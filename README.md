@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screens/hero-globe-serbia.png" alt="Globe heatmap of total fertility, Serbia in view" width="920">
+  <img src="docs/screens/hero-globe-serbia.gif" alt="Globe heatmap of total fertility, Serbia in view" width="920">
 </p>
 
 <p align="center"><em>Serbia on the globe. Color is total fertility; white is the world average.</em></p>
@@ -24,30 +24,20 @@ Default country is **Serbia**. Open a view, press **Space** to start or stop. Pl
 ## Views
 
 <p align="center">
-  <img src="docs/screens/pyramid-serbia.png" alt="Serbia population pyramid at the start year" width="920">
+  <img src="docs/screens/pyramid-serbia.gif" alt="Serbia population pyramid playing forward" width="920">
 </p>
 
-<p align="center"><em>Pyramid — Serbia at the start year. Flag window, both side panels open.</em></p>
+<p align="center"><em>Pyramid — Serbia, flag window, both side panels open.</em></p>
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/screens/pyramid-serbia-2100.png" alt="Serbia population pyramid in 2100" width="100%">
-      <p align="center"><em>Same pyramid, year 2100.</em></p>
-    </td>
-    <td width="50%" valign="top">
-      <img src="docs/screens/map-hover-serbia.png" alt="World map hover pyramid for Serbia" width="100%">
-      <p align="center"><em>Hover Serbia: mini-pyramid locked to the simulation year.</em></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="docs/screens/triangle-serbia.png" alt="Triangle view with Serbia in the crosshair" width="100%">
+      <img src="docs/screens/triangle-serbia.gif" alt="Triangle view with Serbia in the crosshair" width="100%">
       <p align="center"><em>Triangle — population, mortality, fertility over the map.</em></p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screens/graphs-serbia.png" alt="Serbia country graphs with WPP overlay" width="100%">
-      <p align="center"><em>Country graphs, dashed UN WPP Medium overlay.</em></p>
+      <img src="docs/screens/around-the-globe-triangle.gif" alt="Triangle overlay while the globe rotates" width="100%">
+      <p align="center"><em>Triangle on the globe — spin the world, keep the three pyramids.</em></p>
     </td>
   </tr>
 </table>
@@ -68,6 +58,7 @@ Default country is **Serbia**. Open a view, press **Space** to start or stop. Pl
 - Heatmaps **diverge around the mean** for TFR and most metrics (red below, white near average, blue above). **Absolute population** is a log scale.
 - Hover a country on the world map: the mini-pyramid **follows the simulation year** and **pauses when you pause**.
 - Country graphs can overlay the **UN WPP 2024 Medium** variant as a dashed line.
+- Interface in **English** or **Serbian (Cyrillic)**.
 - Not an official UN or national statistical office forecast.
 
 ## Data
