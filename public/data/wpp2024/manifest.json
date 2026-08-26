@@ -1,0 +1,47 @@
+{
+  "source": "United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024.",
+  "license": "CC BY 3.0 IGO",
+  "file": "GEN/01 Demographic indicators",
+  "variants": [
+    "Estimates 1950-2023",
+    "Medium 2024-2100"
+  ],
+  "countries": 237,
+  "shards": [
+    {
+      "id": "tfr",
+      "file": "tfr.json",
+      "bytes": 465839
+    },
+    {
+      "id": "population",
+      "file": "population.json",
+      "bytes": 535911
+    },
+    {
+      "id": "e0",
+      "file": "e0.json",
+      "bytes": 501689
+    },
+    {
+      "id": "net-migration",
+      "file": "net-migration.json",
+      "bytes": 455690
+    },
+    {
+      "id": "births",
+      "file": "births.json",
+      "bytes": 472172
+    },
+    {
+      "id": "median-age",
+      "file": "median-age.json",
+      "bytes": 466383
+    },
+    {
+      "id": "srb",
+      "file": "srb.json",
+      "bytes": 464305
+    }
+  ]
+}

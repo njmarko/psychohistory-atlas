@@ -1,0 +1,39 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Psychohistory Atlas by Marko Njegomir",
+      "hasCanvas": true,
+      "bodyTextLen": 2323,
+      "bodyTextHash": "8e46bdf83b7f4b38f320967f1280a61eca0e6ee7fa45532caed3065bbd11dc11",
+      "bodyTextPrefix": "Psychohistory Atlas Pyramid Triangle World map Regions Database ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Psychohistory Atlas by Marko Njegomir",
+      "hasCanvas": true,
+      "bodyTextLen": 1850,
+      "bodyTextHash": "82e5dea2297d57370b1c7ea35a05b98eec05e44a5ca05a330c6524ebcbda0a97",
+      "bodyTextPrefix": "☰ Pyramid 🇬🇧 EN ⚙ ▤ COUNTRY & SCENARIO Country Serbia Age–sex ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [
+    "BRAND WARNING: this looks like a game/canvas app but /workspace/public/og.jpg is missing. Games and visually rich apps must ship a custom 1200x630 share card built from the app's own art — the default og.grok.me placeholder card is not acceptable for them. You are not done: open /workspace/.grok/skills/og/SKILL.md and finish the brand-asset pass.",
+    "BRAND WARNING: this looks like a game/canvas app but src/lib/og/site.json is missing \"type\": \"x:game\". X uses og:type=x:game to present the unfurl as a game card — set it in /workspace/src/lib/og/site.json per /workspace/.grok/skills/og/SKILL.md. Do not invent x:type or overload twitter:card as the game signal."
+  ],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

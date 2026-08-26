@@ -1,0 +1,882 @@
+{
+  "SRB": {
+    "latest": {
+      "e0": 76.2,
+      "e0Year": 2023,
+      "netMigration": -12000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.28,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.35
+    },
+    "series": {
+      "e0": [
+        {
+          "year": 2000,
+          "value": 72.1,
+          "source": "wpp2024"
+        },
+        {
+          "year": 2010,
+          "value": 74.3,
+          "source": "wpp2024"
+        },
+        {
+          "year": 2023,
+          "value": 76.2,
+          "source": "wpp2024"
+        }
+      ],
+      "netMigration": [
+        {
+          "year": 2000,
+          "value": -18000,
+          "source": "wpp2024"
+        },
+        {
+          "year": 2015,
+          "value": -15000,
+          "source": "wpp2024"
+        },
+        {
+          "year": 2023,
+          "value": -12000,
+          "source": "wpp2024"
+        }
+      ],
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.4,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2018,
+          "value": 2.28,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "DEU": {
+    "latest": {
+      "e0": 81.5,
+      "e0Year": 2023,
+      "netMigration": 270000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.18,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.22
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.2,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2021,
+          "value": 2.18,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "FRA": {
+    "latest": {
+      "e0": 83,
+      "e0Year": 2023,
+      "netMigration": 60000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.48,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.5
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.5,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2021,
+          "value": 2.48,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "ITA": {
+    "latest": {
+      "e0": 83.2,
+      "e0Year": 2023,
+      "netMigration": 150000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.18,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.2
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.2,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2021,
+          "value": 2.18,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "ESP": {
+    "latest": {
+      "e0": 83.4,
+      "e0Year": 2023,
+      "netMigration": 400000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.24,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.28
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.3,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2021,
+          "value": 2.24,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "GBR": {
+    "latest": {
+      "e0": 81.3,
+      "e0Year": 2023,
+      "netMigration": 600000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.35,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.38
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.4,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2018,
+          "value": 2.35,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "USA": {
+    "latest": {
+      "e0": 79.3,
+      "e0Year": 2023,
+      "netMigration": 900000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.5,
+      "idealTfrYear": 2023,
+      "idealTfrMeanAll": 2.6
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2018,
+          "value": 2.6,
+          "source": "gallup"
+        },
+        {
+          "year": 2023,
+          "value": 2.5,
+          "source": "gallup"
+        }
+      ]
+    }
+  },
+  "JPN": {
+    "latest": {
+      "e0": 84.8,
+      "e0Year": 2023,
+      "netMigration": 150000,
+      "netMigrationYear": 2023,
+      "idealTfr": 1.8,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 1.95
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2016,
+          "value": 2,
+          "source": "nfs_japan"
+        },
+        {
+          "year": 2021,
+          "value": 1.8,
+          "source": "nfs_japan"
+        }
+      ]
+    }
+  },
+  "KOR": {
+    "latest": {
+      "e0": 84.3,
+      "e0Year": 2023,
+      "netMigration": 70000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2,
+      "idealTfrYear": 2022,
+      "idealTfrMeanAll": 2.15
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2018,
+          "value": 2.2,
+          "source": "kosis"
+        },
+        {
+          "year": 2022,
+          "value": 2,
+          "source": "kosis"
+        }
+      ]
+    }
+  },
+  "CHN": {
+    "latest": {
+      "e0": 78.2,
+      "e0Year": 2023,
+      "netMigration": -300000,
+      "netMigrationYear": 2023,
+      "idealTfr": 1.8,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 1.85
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2017,
+          "value": 1.9,
+          "source": "survey"
+        },
+        {
+          "year": 2021,
+          "value": 1.8,
+          "source": "survey"
+        }
+      ]
+    }
+  },
+  "IND": {
+    "latest": {
+      "e0": 72,
+      "e0Year": 2023,
+      "netMigration": -400000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.1,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.3
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2016,
+          "value": 2.2,
+          "source": "dhs"
+        },
+        {
+          "year": 2021,
+          "value": 2.1,
+          "source": "dhs"
+        }
+      ]
+    }
+  },
+  "NGA": {
+    "latest": {
+      "e0": 54.5,
+      "e0Year": 2023,
+      "netMigration": -60000,
+      "netMigrationYear": 2023,
+      "idealTfr": 6.1,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 6.2
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2013,
+          "value": 6.5,
+          "source": "dhs"
+        },
+        {
+          "year": 2018,
+          "value": 6.1,
+          "source": "dhs"
+        }
+      ]
+    }
+  },
+  "POL": {
+    "latest": {
+      "e0": 78.3,
+      "e0Year": 2023,
+      "netMigration": -20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.25,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.3
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.3,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2021,
+          "value": 2.25,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "RUS": {
+    "latest": {
+      "e0": 73.2,
+      "e0Year": 2023,
+      "netMigration": 100000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2019,
+      "idealTfrMeanAll": 2.25
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2012,
+          "value": 2.3,
+          "source": "ggs"
+        },
+        {
+          "year": 2019,
+          "value": 2.2,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "UKR": {
+    "latest": {
+      "e0": 71.8,
+      "e0Year": 2023,
+      "netMigration": -800000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.1,
+      "idealTfrYear": 2020,
+      "idealTfrMeanAll": 2.15
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2012,
+          "value": 2.2,
+          "source": "ggs"
+        },
+        {
+          "year": 2020,
+          "value": 2.1,
+          "source": "ggs"
+        }
+      ]
+    }
+  },
+  "SWE": {
+    "latest": {
+      "e0": 83.3,
+      "e0Year": 2023,
+      "netMigration": 50000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.5,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.5
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.5,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "NLD": {
+    "latest": {
+      "e0": 82.2,
+      "e0Year": 2023,
+      "netMigration": 80000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.3
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.3,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "HRV": {
+    "latest": {
+      "e0": 78.6,
+      "e0Year": 2023,
+      "netMigration": -5000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.35
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.4,
+          "source": "eurobarometer"
+        },
+        {
+          "year": 2018,
+          "value": 2.3,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "BIH": {
+    "latest": {
+      "e0": 77.2,
+      "e0Year": 2023,
+      "netMigration": -15000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "MNE": {
+    "latest": {
+      "e0": 77.4,
+      "e0Year": 2023,
+      "netMigration": -2000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "MKD": {
+    "latest": {
+      "e0": 75.8,
+      "e0Year": 2023,
+      "netMigration": -4000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "HUN": {
+    "latest": {
+      "e0": 76.5,
+      "e0Year": 2023,
+      "netMigration": 20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.22
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2011,
+          "value": 2.2,
+          "source": "eurobarometer"
+        }
+      ]
+    }
+  },
+  "ROU": {
+    "latest": {
+      "e0": 75.6,
+      "e0Year": 2023,
+      "netMigration": -30000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "BGR": {
+    "latest": {
+      "e0": 75.1,
+      "e0Year": 2023,
+      "netMigration": -8000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "GRC": {
+    "latest": {
+      "e0": 81.5,
+      "e0Year": 2023,
+      "netMigration": 20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.45
+    }
+  },
+  "AUT": {
+    "latest": {
+      "e0": 81.8,
+      "e0Year": 2023,
+      "netMigration": 40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.19,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.2
+    }
+  },
+  "CHE": {
+    "latest": {
+      "e0": 84,
+      "e0Year": 2023,
+      "netMigration": 50000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.2
+    }
+  },
+  "BEL": {
+    "latest": {
+      "e0": 82.1,
+      "e0Year": 2023,
+      "netMigration": 50000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "DNK": {
+    "latest": {
+      "e0": 81.7,
+      "e0Year": 2023,
+      "netMigration": 25000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "FIN": {
+    "latest": {
+      "e0": 81.9,
+      "e0Year": 2023,
+      "netMigration": 20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.5,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.5
+    }
+  },
+  "IRL": {
+    "latest": {
+      "e0": 82.4,
+      "e0Year": 2023,
+      "netMigration": 40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.6,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.65
+    }
+  },
+  "CZE": {
+    "latest": {
+      "e0": 79.4,
+      "e0Year": 2023,
+      "netMigration": 40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.2
+    }
+  },
+  "SVK": {
+    "latest": {
+      "e0": 77.9,
+      "e0Year": 2023,
+      "netMigration": 5000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "SVN": {
+    "latest": {
+      "e0": 81.6,
+      "e0Year": 2023,
+      "netMigration": 10000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "ALB": {
+    "latest": {
+      "e0": 79,
+      "e0Year": 2023,
+      "netMigration": -15000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.5
+    }
+  },
+  "TUR": {
+    "latest": {
+      "e0": 78.1,
+      "e0Year": 2023,
+      "netMigration": 100000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.5,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.6
+    }
+  },
+  "EGY": {
+    "latest": {
+      "e0": 71.8,
+      "e0Year": 2023,
+      "netMigration": -40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.8,
+      "idealTfrYear": 2014,
+      "idealTfrMeanAll": 2.9
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2014,
+          "value": 2.8,
+          "source": "dhs"
+        }
+      ]
+    }
+  },
+  "ZAF": {
+    "latest": {
+      "e0": 65.3,
+      "e0Year": 2023,
+      "netMigration": 80000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.6,
+      "idealTfrYear": 2016,
+      "idealTfrMeanAll": 2.7
+    }
+  },
+  "KEN": {
+    "latest": {
+      "e0": 66.7,
+      "e0Year": 2023,
+      "netMigration": -10000,
+      "netMigrationYear": 2023,
+      "idealTfr": 3.4,
+      "idealTfrYear": 2022,
+      "idealTfrMeanAll": 3.6
+    },
+    "series": {
+      "idealTfr": [
+        {
+          "year": 2014,
+          "value": 3.6,
+          "source": "dhs"
+        },
+        {
+          "year": 2022,
+          "value": 3.4,
+          "source": "dhs"
+        }
+      ]
+    }
+  },
+  "ETH": {
+    "latest": {
+      "e0": 66.2,
+      "e0Year": 2023,
+      "netMigration": -20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 4.3,
+      "idealTfrYear": 2016,
+      "idealTfrMeanAll": 4.5
+    }
+  },
+  "IDN": {
+    "latest": {
+      "e0": 71.3,
+      "e0Year": 2023,
+      "netMigration": -40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.5,
+      "idealTfrYear": 2017,
+      "idealTfrMeanAll": 2.6
+    }
+  },
+  "PAK": {
+    "latest": {
+      "e0": 67.3,
+      "e0Year": 2023,
+      "netMigration": -600000,
+      "netMigrationYear": 2023,
+      "idealTfr": 3.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 3.6
+    }
+  },
+  "BGD": {
+    "latest": {
+      "e0": 73.4,
+      "e0Year": 2023,
+      "netMigration": -400000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "VNM": {
+    "latest": {
+      "e0": 75.4,
+      "e0Year": 2023,
+      "netMigration": -40000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2.2
+    }
+  },
+  "THA": {
+    "latest": {
+      "e0": 76.8,
+      "e0Year": 2023,
+      "netMigration": 30000,
+      "netMigrationYear": 2023,
+      "idealTfr": 1.9,
+      "idealTfrYear": 2021,
+      "idealTfrMeanAll": 2
+    }
+  },
+  "BRA": {
+    "latest": {
+      "e0": 75.8,
+      "e0Year": 2023,
+      "netMigration": 20000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.1,
+      "idealTfrYear": 2019,
+      "idealTfrMeanAll": 2.2
+    }
+  },
+  "MEX": {
+    "latest": {
+      "e0": 75.1,
+      "e0Year": 2023,
+      "netMigration": -60000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.5
+    }
+  },
+  "ARG": {
+    "latest": {
+      "e0": 76.9,
+      "e0Year": 2023,
+      "netMigration": 5000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2019,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "CHL": {
+    "latest": {
+      "e0": 80.2,
+      "e0Year": 2023,
+      "netMigration": 80000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.2,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.3
+    }
+  },
+  "CAN": {
+    "latest": {
+      "e0": 82.4,
+      "e0Year": 2023,
+      "netMigration": 400000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.3,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.4
+    }
+  },
+  "AUS": {
+    "latest": {
+      "e0": 83.3,
+      "e0Year": 2023,
+      "netMigration": 200000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2015,
+      "idealTfrMeanAll": 2.45
+    }
+  },
+  "NZL": {
+    "latest": {
+      "e0": 82.5,
+      "e0Year": 2023,
+      "netMigration": 30000,
+      "netMigrationYear": 2023,
+      "idealTfr": 2.4,
+      "idealTfrYear": 2018,
+      "idealTfrMeanAll": 2.4
+    }
+  }
+}

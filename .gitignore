@@ -1,0 +1,16 @@
+node_modules
+dist
+data-raw
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.local
+.env
+.env.*
+.vite
+.vercel
+.idea
+*.log
+data/*.xlsx
+data/*.xls
+psychohistory-atlas

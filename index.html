@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Psychohistory Atlas by Marko Njegomir</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <header class="navbar">
+      <button type="button" class="nav-icon nav-menu-btn" id="btnNavMenu" data-i18n-aria="nav.menu" aria-label="Open views" aria-expanded="false" aria-controls="navSheet">☰</button>
+      <img src="./njego.svg" alt="Њ" class="nav-logo" width="32" height="32" data-i18n-tip="meta.brandTip" data-tip="Psychohistory Atlas — made by Marko Njegomir with Grok" />
+      <div class="nav-brand">
+        <strong data-i18n="meta.brand">Psychohistory Atlas</strong>
+        <span class="nav-view-label" id="navViewLabel">Pyramid</span>
+      </div>
+      <nav class="nav-tabs" id="modeTabs" role="tablist">
+        <button type="button" class="mode-tab active" data-mode="pyramid" data-i18n="nav.pyramid" data-i18n-tip="nav.pyramidTip">Pyramid</button>
+        <button type="button" class="mode-tab" data-mode="triangle" data-i18n="nav.triangle" data-i18n-tip="nav.triangleTip">Triangle</button>
+        <button type="button" class="mode-tab" data-mode="map" data-i18n="nav.map" data-i18n-tip="nav.mapTip">World map</button>
+        <button type="button" class="mode-tab" data-mode="regions" data-i18n="nav.regions" data-i18n-tip="nav.regionsTip">Regions</button>
+        <button type="button" class="mode-tab" data-mode="database" data-i18n="nav.database" data-i18n-tip="nav.databaseTip">Database</button>
+        <button type="button" class="mode-tab" data-mode="help" data-i18n="nav.help" data-i18n-tip="nav.helpTip">How it works</button>
+      </nav>
+      <div class="nav-actions">
+        <span class="nav-credit" data-i18n="meta.credit">Made by Marko Njegomir with Grok</span>
+        <div class="lang-switch" id="langSwitch">
+          <button type="button" class="nav-lang-btn" id="btnLang" data-i18n-tip="lang.tip" data-i18n-aria="lang.label" aria-haspopup="listbox" aria-expanded="false">
+            <span class="lang-flag" id="langFlag">🇬🇧</span>
+            <span class="lang-code" id="langCode">EN</span>
+          </button>
+          <ul class="lang-menu" id="langMenu" hidden role="listbox"></ul>
+        </div>
+        <button type="button" class="nav-panel-btn" id="btnSettings" data-i18n-tip="nav.settings" data-i18n-aria="nav.settings" aria-pressed="false">
+          <span class="nav-panel-ico" aria-hidden="true">⚙</span>
+          <span class="nav-panel-label" data-i18n="nav.settings">Settings</span>
+        </button>
+        <button type="button" class="nav-panel-btn" id="btnCountryData" data-i18n-tip="nav.countryData" data-i18n-aria="nav.countryData" aria-pressed="false">
+          <span class="nav-panel-ico" aria-hidden="true">▤</span>
+          <span class="nav-panel-label" data-i18n="nav.countryData">Country data</span>
+        </button>
+      </div>
+    </header>
+    <div id="navSheet" class="nav-sheet" hidden>
+      <button type="button" class="nav-sheet-item" data-mode="pyramid" data-i18n="nav.pyramid">Pyramid</button>
+      <button type="button" class="nav-sheet-item" data-mode="triangle" data-i18n="nav.triangle">Triangle</button>
+      <button type="button" class="nav-sheet-item" data-mode="map" data-i18n="nav.map">World map</button>
+      <button type="button" class="nav-sheet-item" data-mode="regions" data-i18n="nav.regions">Regions</button>
+      <button type="button" class="nav-sheet-item" data-mode="database" data-i18n="nav.database">Database</button>
+      <button type="button" class="nav-sheet-item" data-mode="help" data-i18n="nav.help">How it works</button>
+    </div>
+
+    <aside class="sidebar left" id="leftSidebar">
+      <section class="panel" id="panelCountry">
+        <h2 data-i18n="panels.countryScenario">Country &amp; scenario</h2>
+        <label class="field" data-i18n-tip="country.tip">
+          <span data-i18n="country.label">Country</span>
+          <div class="country-combo" id="countryCombo">
+            <input type="search" id="countrySearch" class="country-search" placeholder="Search name or ISO (srb, usa…)" data-i18n-placeholder="country.search" autocomplete="off" spellcheck="false" />
+            <ul id="countryList" class="country-list" role="listbox" hidden></ul>
+          </div>
+        </label>
+        <div class="source-card" id="sourceCard">—</div>
+        <div class="field" data-i18n-tip="scenario.tfrTip">
+          <span><span data-i18n="scenario.tfr">Fertility rate (TFR)</span> <label class="use-check" data-i18n-tip="scenario.tfrUseTip"><input type="checkbox" id="applyTfr" checked /> <span data-i18n="scenario.use">Use</span></label></span>
+          <div class="range-row">
+            <input type="range" id="tfrRange" min="0.5" max="6" step="0.01" value="1.70" />
+            <input type="number" id="tfrInput" min="0.5" max="6" step="0.01" value="1.70" />
+          </div>
+        </div>
+        <div class="field" data-i18n-tip="scenario.leTip">
+          <span><span data-i18n="scenario.le">Life expectancy (years)</span> <label class="use-check" data-i18n-tip="scenario.leUseTip"><input type="checkbox" id="applyLe" checked /> <span data-i18n="scenario.use">Use</span></label></span>
+          <div class="range-row">
+            <input type="range" id="leRange" min="50" max="95" step="0.5" value="76" />
+            <input type="number" id="leInput" min="50" max="95" step="0.5" value="76" />
+          </div>
+        </div>
+        <div class="field" data-i18n-tip="scenario.migTip">
+          <span><span data-i18n="scenario.mig">Net migration / year</span> <label class="use-check" data-i18n-tip="scenario.migUseTip"><input type="checkbox" id="applyMig" /> <span data-i18n="scenario.use">Use</span></label></span>
+          <div class="range-row">
+            <input type="range" id="migRange" min="-200000" max="200000" step="1000" value="0" />
+            <input type="number" id="migInput" min="-500000" max="500000" step="1000" value="0" />
+          </div>
+        </div>
+        <div class="field" data-i18n-tip="scenario.srbTip">
+          <span><span data-i18n="scenario.srb">Sex ratio at birth (boys per girl)</span> <label class="use-check" data-i18n-tip="scenario.srbUseTip"><input type="checkbox" id="applySrb" checked /> <span data-i18n="scenario.use">Use</span></label></span>
+          <div class="range-row">
+            <input type="range" id="srbRange" min="1.00" max="1.20" step="0.01" value="1.05" />
+            <input type="number" id="srbInput" min="1.00" max="1.20" step="0.01" value="1.05" />
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="panelMapOptions" hidden>
+        <h2 data-i18n="panels.map">Map</h2>
+        <label class="field" data-i18n-tip="map.surfaceTip">
+          <span data-i18n="map.surface">Surface</span>
+          <select id="mapSurface">
+            <option value="map" data-i18n="map.surfaceMap">Flat world map</option>
+            <option value="globe" data-i18n="map.surfaceGlobe">Globe</option>
+          </select>
+        </label>
+        <label class="field" data-i18n-tip="map.countrySetTip">
+          <span data-i18n="map.countrySet">Country set</span>
+          <select id="mapCountrySet">
+            <option value="all" data-i18n="map.countrySetAll">All countries with data</option>
+            <option value="tfr2026" data-i18n="map.countrySetTfr">Only BirthGauge / 2026 TFR file</option>
+          </select>
+        </label>
+        <label class="field" data-i18n-tip="map.metricTip">
+          <span data-i18n="map.metric">Heatmap metric</span>
+          <select id="mapMetric"></select>
+        </label>
+        <label class="field" data-i18n-tip="map.colorModeTip">
+          <span data-i18n="map.colorMode">Color mode</span>
+          <select id="colorMode">
+            <option value="diverging" data-i18n="map.colorDiverging">Diverging around average</option>
+            <option value="sequential" data-i18n="map.colorSequential">Sequential min → max</option>
+            <option value="tfrReplacement" data-i18n="map.colorReplacement">TFR vs replacement 2.1</option>
+            <option value="dual" data-i18n="map.colorDual">Dual: fill share · border TFR</option>
+          </select>
+        </label>
+        <label class="field" data-i18n-tip="map.pivotTip">
+          <span data-i18n="map.pivot">Average (pivot)</span>
+          <select id="pivotStat">
+            <option value="mean" data-i18n="map.pivotMean">Auto: mean of this metric</option>
+            <option value="median" data-i18n="map.pivotMedian">Median of this metric</option>
+            <option value="popWeighted" data-i18n="map.pivotPop">Population-weighted mean</option>
+            <option value="custom" data-i18n="map.pivotCustom">Custom value</option>
+          </select>
+        </label>
+        <label class="field" id="customPivotWrap" hidden data-i18n-tip="map.customPivotTip">
+          <span data-i18n="map.customPivot">Custom pivot</span>
+          <input type="number" id="customPivot" step="0.01" value="2.1" />
+        </label>
+        <label class="field" data-i18n-tip="map.pivotMetricTip">
+          <span data-i18n="map.pivotMetric">Pivot metric (optional override)</span>
+          <select id="pivotMetric">
+            <option value="" data-i18n="map.pivotSame">Same as heatmap metric</option>
+          </select>
+        </label>
+        <label class="field" data-i18n-tip="map.paletteTip">
+          <span data-i18n="map.palette">Palette</span>
+          <select id="paletteStops">
+            <option value="3" data-i18n="map.palette3">3 colors (low · average · high)</option>
+            <option value="2" data-i18n="map.palette2">2 colors (low · high)</option>
+          </select>
+        </label>
+        <div class="color-row">
+          <label class="field compact" data-i18n-tip="map.belowTip"><span data-i18n="map.below">Below</span><input type="color" id="heatLow" value="#DC2626" /></label>
+          <label class="field compact" id="midColorWrap" data-i18n-tip="map.averageTip"><span data-i18n="map.average">Average</span><input type="color" id="heatMid" value="#FFFFFF" /></label>
+          <label class="field compact" data-i18n-tip="map.aboveTip"><span data-i18n="map.above">Above</span><input type="color" id="heatHigh" value="#2563EB" /></label>
+        </div>
+        <label class="check" data-i18n-tip="map.useCountryTfrTip"><input type="checkbox" id="useCountryTfr" checked /><span data-i18n="map.useCountryTfr">Use each country’s own TFR</span></label>
+        <label class="check" data-i18n-tip="map.useCountryLeTip"><input type="checkbox" id="useCountryLe" checked /><span data-i18n="map.useCountryLe">Use country life expectancy</span></label>
+        <label class="check" data-i18n-tip="map.useCountryMigTip"><input type="checkbox" id="useCountryMig" /><span data-i18n="map.useCountryMig">Use each country’s net migration</span></label>
+        <label class="check" data-i18n-tip="map.useWppMediumTip"><input type="checkbox" id="useWppMediumRates" /><span data-i18n="map.useWppMedium">Drive simulation with WPP Medium rates</span></label>
+        <label class="check" data-i18n-tip="map.showMissingTip"><input type="checkbox" id="mapShowMissing" checked /><span data-i18n="map.showMissing">Show areas without data (gray)</span></label>
+        <label class="check" data-i18n-tip="map.idealMeanAllTip"><input type="checkbox" id="idealMeanAll" /><span data-i18n="map.idealMeanAll">Ideal fertility: mean of all surveys</span></label>
+        <label class="check" data-i18n-tip="map.hoverMiniTip"><input type="checkbox" id="hoverMini" checked /><span data-i18n="map.hoverMini">Show mini-pyramid next to cursor</span></label>
+        <label class="field" hidden data-tip="In triangle view, when playback is stopped, the overlay loops this many years forward from the selected year. Does not move the year strip.">
+          <span>Triangle: years from current</span>
+          <div class="range-row">
+            <input type="range" id="hoverSpanYears" min="5" max="200" step="5" value="100" />
+            <input type="number" id="hoverSpanYearsNum" min="5" max="200" step="1" value="100" />
+          </div>
+        </label>
+        <label class="check" hidden data-tip="Unused: the hover pyramid now follows the simulation year and speed."><input type="checkbox" id="hoverMatchSpeed" checked /><span>Hover pyramid uses simulation speed</span></label>
+        <label class="field" id="hoverSpeedWrap" hidden data-tip="Unused: the hover pyramid now follows the simulation year.">
+          <span>Hover speed (years / second)</span>
+          <div class="range-row">
+            <input type="range" id="hoverSpeedRange" min="0.5" max="30" step="0.5" value="15" />
+            <input type="number" id="hoverSpeedInput" min="0.5" max="60" step="0.5" value="15" />
+          </div>
+        </label>
+        <label class="field" data-tip="Width of the hover pyramid. The window uses 3:2 flag proportions (wider than tall).">
+          <span>Hover pyramid size</span>
+          <div class="range-row">
+            <input type="range" id="hoverSize" min="200" max="900" step="10" value="480" />
+            <input type="number" id="hoverSizeNum" min="200" max="900" step="10" value="480" />
+          </div>
+        </label>
+        <label class="field" data-tip="Font size for the country name, year, population, and TFR on the hover pyramid.">
+          <span>Hover title size</span>
+          <div class="range-row">
+            <input type="range" id="hoverTitleSize" min="10" max="32" step="1" value="18" />
+            <input type="number" id="hoverTitleSizeNum" min="8" max="40" value="18" />
+          </div>
+        </label>
+        <label class="field" data-tip="Font size for the age-range labels in the middle of the hover pyramid.">
+          <span>Hover age-label size</span>
+          <div class="range-row">
+            <input type="range" id="hoverAgeSize" min="8" max="22" step="1" value="12" />
+            <input type="number" id="hoverAgeSizeNum" min="6" max="28" value="12" />
+          </div>
+        </label>
+        <label class="field" data-tip="How many age ranges (0–100) the hover pyramid shows. 21 is the usual 5-year groups.">
+          <span>Hover age ranges</span>
+          <input type="number" id="hoverBands" min="1" max="100" value="21" />
+        </label>
+        <label class="check" data-tip="Show 0–4, 5–9, … (or your custom ranges) on the center line of the hover pyramid."><input type="checkbox" id="hoverShowAge" checked /><span>Hover: age labels in the middle</span></label>
+        <label class="check" data-tip="Show headcounts at the ends of hover-pyramid bars. Male and female totals sit on the axis labels."><input type="checkbox" id="hoverShowCounts" checked /><span>Hover: population counts</span></label>
+        <label class="check" data-tip="Same flag-window as the main pyramid: bars clip a flag sitting behind them."><input type="checkbox" id="hoverFlagWindow" checked /><span>Hover: flag window on bars</span></label>
+        <label class="field" data-tip="Opacity of the hover card and mini-pyramid. Lower is more see-through. On phones the window is already smaller and more transparent.">
+          <span>Hover window opacity</span>
+          <div class="range-row">
+            <input type="range" id="hoverOpacity" min="20" max="100" step="1" value="92" />
+            <input type="number" id="hoverOpacityNum" min="20" max="100" value="92" />
+          </div>
+        </label>
+        <p class="hint" data-i18n="panels.tagFields">Tag fields</p>
+        <div id="tagFields" class="tag-fields"></div>
+        <label class="field" data-tip="Transparency of pinned country cards on the map.">
+          <span>Tag opacity</span>
+          <div class="range-row">
+            <input type="range" id="tagOpacity" min="10" max="100" step="1" value="85" />
+            <input type="number" id="tagOpacityNum" min="10" max="100" value="85" />
+          </div>
+        </label>
+        <button id="btnClearPins" class="btn full" type="button" data-tip="Remove every pinned country label from the map.">Clear pinned countries</button>
+        <p class="hint map-hint" id="mapDataHint">—</p>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="panels.simulation">Simulation</h2>
+        <label class="field" data-tip="First year of the pyramid run. Defaults to the freshest data year for this country (for example BirthGauge TFR 2026).">
+          <span>Start year</span>
+          <input type="number" id="startYear" value="2024" min="2024" max="2100" data-tip="First year of the pyramid run. Cannot precede the age–sex snapshot (usually 2024). Country graphs can still show earlier WPP years." />
+        </label>
+        <label class="field" data-tip="Last year to project to. The model steps one calendar year at a time. Playback loops when it reaches this year.">
+          <span>End year</span>
+          <input type="number" id="endYear" value="2124" min="1950" max="2300" />
+        </label>
+        <label class="check" data-tip="Sets playback speed so start→end fits the target video length."><input type="checkbox" id="fitToLength" /><span>Fit playback to a video length</span></label>
+        <label class="field" id="durationWrap" hidden data-tip="Length of the exported / played timelapse in seconds. Speed is computed automatically.">
+          <span>Target length (seconds)</span>
+          <input type="number" id="durationSec" value="12" min="2" max="180" step="1" />
+        </label>
+        <label class="field" data-tip="How many simulated years pass per second of playback and video.">
+          <span>Speed (years / second)</span>
+          <div class="range-row">
+            <input type="range" id="speedRange" min="0.5" max="30" step="0.5" value="15" />
+            <input type="number" id="speedInput" min="0.5" max="60" step="0.5" value="15" />
+          </div>
+        </label>
+        <div class="btn-row">
+          <button id="btnPlay" class="btn primary" type="button" data-tip="Play from the current year. Loops at the end year. Space also toggles start/stop.">▶ Run</button>
+          <button id="btnPause" class="btn" type="button" disabled data-tip="Pause playback. The year stays where it is.">⏸ Pause</button>
+          <button id="btnReset" class="btn" type="button" data-tip="Jump back to the start year and pause.">↺ Reset</button>
+        </div>
+        <label class="field" data-tip="Drag to jump to any year in the projection. Same year as the strip at the bottom of the map.">
+          <span>Scrub year</span>
+          <input type="range" id="yearScrub" min="2024" max="2126" step="1" value="2024" />
+          <div class="year-readout" id="yearReadout">2024</div>
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="panels.appearance">Appearance</h2>
+        <div class="color-row">
+          <label class="field compact" data-tip="Male bar color when the flag window is not painting the bars (and Flag colors is off)."><span>Male</span><input type="color" id="maleColor" value="#3B82F6" /></label>
+          <label class="field compact" data-tip="Female bar color when the flag window is not painting the bars (and Flag colors is off)."><span>Female</span><input type="color" id="femaleColor" value="#F43F5E" /></label>
+        </div>
+        <div class="color-row">
+          <label class="field compact" data-tip="Canvas and map background, also used in exported video."><span>Background</span><input type="color" id="bgColor" value="#0F172A" /></label>
+          <label class="field compact" data-tip="Titles, age labels, and axis text."><span>Text</span><input type="color" id="textColor" value="#E2E8F0" /></label>
+        </div>
+        <label class="check" data-tip="Draw the country flag next to the name in the chart title."><input type="checkbox" id="showFlag" checked /><span>Show country flag next to name</span></label>
+        <label class="check" data-tip="Pick male/female bar colors from the two strongest colors in the flag."><input type="checkbox" id="flagColors" checked /><span>Color bars from the flag</span></label>
+        <label class="check" data-tip="The full flag sits behind the pyramid. Shorter bars reveal less of it — like looking through the bars at a fixed flag."><input type="checkbox" id="flagWindow" checked /><span>Flag window (bars reveal the flag)</span></label>
+        <label class="check" data-tip="Show headcounts (or % of total, if that box is on) at the end of each bar."><input type="checkbox" id="showCounts" checked /><span>Show population counts</span></label>
+        <label class="check" data-tip="Show 0–4 … 100+ in the middle of the pyramid."><input type="checkbox" id="showAgeLabels" checked /><span>Show age labels</span></label>
+        <label class="check" data-tip="Vertical grid lines and scale ticks on the population axis."><input type="checkbox" id="showGrid" checked /><span>Show grid</span></label>
+        <label class="check" data-tip="Bar lengths as share of total population instead of counts."><input type="checkbox" id="showPercent" /><span>Show as % of total</span></label>
+        <label class="check" data-tip="Male / female totals in a legend at the bottom. If this is off, the totals sit next to the Male and Female axis labels."><input type="checkbox" id="showLegend" checked /><span>Show male / female legend</span></label>
+        <label class="check" data-tip="Summary strip at the bottom of the window (year, total, median age, TFR…)."><input type="checkbox" id="showStats" checked /><span>Show stats bar</span></label>
+        <label class="check" data-tip="When playback is stopped in triangle view, loop the three pyramids about 100 years from the selected year. Does not move the year strip. While playing, the triangle follows the simulation year."><input type="checkbox" id="triangleAnimate" checked /><span>Animate triangle pyramids (+100 years)</span></label>
+        <label class="check" data-tip="Stroke around labels so they stay readable on any flag, heatmap, or globe coloring."><input type="checkbox" id="labelOutline" checked /><span>Outline labels (pyramid &amp; triangle)</span></label>
+        <div class="color-row">
+          <label class="field compact" data-tip="Stroke color drawn behind labels."><span>Outline</span><input type="color" id="labelOutlineColor" value="#000000" /></label>
+          <label class="field compact" data-tip="Fill color for triangle captions (Population / Mortality / Fertility) and titles."><span>Triangle text</span><input type="color" id="triangleTextColor" value="#F8FAFC" /></label>
+        </div>
+        <label class="field" data-tip="Thickness of the label outline. Increase if a busy flag still hides the numbers.">
+          <span>Outline width</span>
+          <div class="range-row">
+            <input type="range" id="labelOutlineWidth" min="0" max="10" step="0.5" value="3" />
+            <input type="number" id="labelOutlineWidthNum" min="0" max="16" step="0.5" value="3" />
+          </div>
+        </label>
+        <label class="field" data-tip="How many equal age bands (covering 0–100) the main pyramid uses. 21 = standard 5-year groups.">
+          <span>Pyramid age ranges</span>
+          <input type="number" id="pyramidBands" min="1" max="100" value="21" />
+        </label>
+        <label class="field" data-tip="Age bands on the left (population) pyramid of the triangle.">
+          <span>Triangle: population ranges</span>
+          <input type="number" id="trianglePopBands" min="1" max="100" value="21" />
+        </label>
+        <label class="field" data-tip="Age bands on the right (mortality) pyramid of the triangle.">
+          <span>Triangle: mortality ranges</span>
+          <input type="number" id="triangleMortBands" min="1" max="100" value="21" />
+        </label>
+        <label class="field" data-tip="Age bands on the bottom (fertility) pyramid of the triangle.">
+          <span>Triangle: fertility ranges</span>
+          <input type="number" id="triangleFertBands" min="1" max="100" value="21" />
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="panels.graphs">Graphs</h2>
+        <div class="color-row">
+          <label class="field compact" data-tip="Background of the country-data charts in the right panel."><span>Chart bg</span><input type="color" id="chartBg" value="#0b1220" /></label>
+          <label class="field compact" data-tip="Axis, title, and tooltip text on the country-data charts."><span>Chart text</span><input type="color" id="chartText" value="#e2e8f0" /></label>
+        </div>
+        <p class="hint" data-i18n="panels.seriesHint">Series to plot (hover a point for its value)</p>
+        <div id="chartSeries" class="chart-series-opts"></div>
+        <label class="check" data-tip="Dashed overlay of UN WPP 2024 Medium variant on the country graphs, for comparison with this app’s series."><input type="checkbox" id="chartShowWpp" checked /><span>Show UN WPP Medium projection</span></label>
+        <label class="field compact" data-tip="Color of the dashed UN WPP Medium overlay.">
+          <span>WPP line</span>
+          <input type="color" id="chartWppColor" value="#94a3b8" />
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="panels.export">Export video</h2>
+        <label class="field" data-tip="Which layers are painted into the video. Graphs are included when the right panel is open.">
+          <span>Screens to capture</span>
+          <div id="captureScreens" class="tag-fields"></div>
+        </label>
+        <label class="field" data-tip="How chosen screens are arranged in the frame.">
+          <span>Layout</span>
+          <select id="exportLayout">
+            <option value="single">Single view</option>
+            <option value="splitH">Horizontal split</option>
+            <option value="splitV">Vertical split</option>
+            <option value="mapGraphs">Map + graphs</option>
+            <option value="pyramidGraphs">Pyramid + graphs</option>
+          </select>
+        </label>
+        <label class="field" data-tip="Output pixel height. Width follows the aspect ratio.">
+          <span>Resolution</span>
+          <select id="exportRes">
+            <option value="720p">720p</option>
+            <option value="1080p" selected>1080p</option>
+            <option value="1440p">1440p</option>
+            <option value="4k">4K</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <label class="field" data-tip="Frame shape of the exported video.">
+          <span>Aspect ratio</span>
+          <select id="exportAspect">
+            <option value="16:9">16:9</option>
+            <option value="9:16">9:16</option>
+            <option value="1:1">1:1</option>
+            <option value="4:3">4:3</option>
+            <option value="21:9">21:9</option>
+          </select>
+        </label>
+        <div class="color-row" id="customResWrap" hidden>
+          <label class="field compact" data-tip="Custom frame width in pixels."><span>W</span><input type="number" id="customW" value="1920" /></label>
+          <label class="field compact" data-tip="Custom frame height in pixels."><span>H</span><input type="number" id="customH" value="1080" /></label>
+        </div>
+        <label class="field" data-tip="MP4 when this browser can encode it. Otherwise the recorder falls back to WebM.">
+          <span>Format</span>
+          <select id="videoFormat">
+            <option value="mp4" selected>MP4 (if supported)</option>
+            <option value="webm">WebM (VP9 / VP8)</option>
+          </select>
+        </label>
+        <label class="field" data-tip="Encoding frame rate. Playback speed of years is still Speed above.">
+          <span>FPS</span>
+          <input type="number" id="exportFps" value="30" min="10" max="60" />
+        </label>
+        <button id="btnExport" class="btn primary full" type="button" data-tip="Record one pass from the start year to the end year as a video file.">🎬 Export timelapse</button>
+        <button id="btnSnapshot" class="btn full" type="button" data-tip="Download a PNG of the pyramid (Pyramid view) or the triangle overlay (Triangle view). Does not capture the world map.">📷 Snapshot PNG</button>
+        <div id="exportStatus" class="export-status" hidden></div>
+      </section>
+    </aside>
+
+    <div class="edge-btn edge-left" id="edgeLeft" data-tip="Show or hide the left controls">‹</div>
+    <div class="resize-handle handle-left" id="handleLeft" data-tip="Drag to resize the left panel"></div>
+
+    <main class="main">
+      <div class="view-toolbar" id="viewToolbar">
+        <div class="country-combo view-toolbar-combo" id="headerCountryCombo">
+          <input type="search" id="headerCountrySearch" class="country-search" placeholder="Search country or ISO (srb, usa…)" autocomplete="off" spellcheck="false" aria-label="Country" aria-autocomplete="list" aria-expanded="false" />
+          <ul id="headerCountryList" class="country-list" role="listbox" hidden></ul>
+        </div>
+        <div class="country-combo view-toolbar-combo view-toolbar-metric" id="headerMetricCombo">
+          <input type="search" id="headerMetricSearch" class="country-search" placeholder="Heatmap metric…" autocomplete="off" spellcheck="false" aria-label="Heatmap metric" aria-autocomplete="list" aria-expanded="false" data-tip="What each country is colored by on the map and in triangle view" />
+          <ul id="headerMetricList" class="country-list" role="listbox" hidden></ul>
+        </div>
+        <div class="view-toolbar-years" id="headerYears">
+          <label class="view-toolbar-year" data-tip="First year of the pyramid run. Cannot precede the age–sex snapshot (usually 2024).">
+            <span>Start</span>
+            <input type="number" id="headerStartYear" min="1950" max="2300" step="1" aria-label="Start year" />
+          </label>
+          <label class="view-toolbar-year" data-tip="Last year of the run. Playback loops when it reaches this year.">
+            <span>End</span>
+            <input type="number" id="headerEndYear" min="1950" max="2300" step="1" aria-label="End year" />
+          </label>
+        </div>
+        <button type="button" class="btn primary view-toolbar-play" id="btnHeaderPlay" data-tip="Start or stop the simulation (Space). Loops at the end year." aria-pressed="false" aria-keyshortcuts="Space">▶ Start</button>
+      </div>
+      <div id="viewPyramid" class="view-panel">
+        <div class="canvas-wrap">
+          <canvas id="pyramidCanvas" width="1200" height="900" aria-label="Population pyramid"></canvas>
+        </div>
+      </div>
+      <div id="viewTriangle" class="view-panel" hidden></div>
+      <div id="viewMap" class="view-panel" hidden>
+        <div class="map-header" id="mapHeader">
+          <div class="map-title" id="mapTitle">World population heatmap</div>
+          <div class="map-subtitle" id="mapSubtitle">Drag to pan · click to pin a tag · WASD / arrows move · scroll to zoom</div>
+        </div>
+        <div class="map-wrap" id="mapWrap">
+          <svg id="worldMapSvg" role="img" aria-label="World choropleth map"></svg>
+          <canvas id="triangleCanvas" class="triangle-overlay" width="1400" height="1000" hidden aria-label="Triangle pyramids"></canvas>
+          <div id="mapCrosshair" class="map-crosshair" hidden aria-hidden="true"><span class="ch-h"></span><span class="ch-v"></span></div>
+          <div id="mapHoverStack" class="map-hover-stack" hidden>
+            <div id="mapHoverMetric" class="map-hover-metric" hidden></div>
+            <div id="mapHoverCard" class="map-hover-card nested"></div>
+            <canvas id="hoverMiniCanvas" class="hover-mini nested" width="480" height="320"></canvas>
+          </div>
+          <div id="mapLegend" class="map-legend" hidden></div>
+          <div class="map-surface-dock">
+            <div class="surface-toggle" id="surfaceToggle">
+              <button type="button" data-surface="map" data-tip="Flat world map (Natural Earth). Drag to pan, scroll to zoom toward the cursor.">Map</button>
+              <button type="button" data-surface="globe" data-tip="Orthographic globe. Drag to spin, scroll to zoom toward the crosshair.">Globe</button>
+            </div>
+          </div>
+          <div class="map-float-ui">
+            <div id="hubCard" class="hub-card" hidden>
+              <div class="hub-card-head">
+                <strong id="hubCardTitle">—</strong>
+                <button type="button" id="hubCardHide" class="hub-card-hide" data-tip="Hide this country info">×</button>
+              </div>
+              <div id="hubCardBody" class="hub-card-body"></div>
+            </div>
+            <button type="button" id="hubCardShow" class="hub-card-show" hidden data-tip="Show info for the country in the crosshair">Info</button>
+            <div class="zoom-btns">
+              <button type="button" id="btnZoomIn" data-tip="Zoom in">+</button>
+              <button type="button" id="btnZoomOut" data-tip="Zoom out">−</button>
+              <button type="button" id="btnZoomReset" data-tip="Reset zoom, pan, and globe rotation">↺</button>
+            </div>
+          </div>
+        </div>
+        <div id="yearStrip" class="year-strip" hidden></div>
+        <div class="map-status" id="mapStatus"></div>
+      </div>
+      <div id="viewHelp" class="view-panel" hidden>
+        <div class="help-page">
+          <h2 data-i18n="panels.helpTitle">How the calculation works</h2>
+          <div class="help-body" id="helpBody"></div>
+        </div>
+      </div>
+      <div id="viewDatabase" class="view-panel" hidden>
+        <div class="db-wrap">
+          <div class="db-toolbar">
+            <h2 data-i18n="panels.databaseTitle">Database</h2>
+            <input type="search" id="dbSearch" placeholder="Filter countries…" data-tip="Filter the table by country name or ISO3." />
+            <button type="button" class="btn" id="btnDbExport" data-tip="Download your local overrides as JSON.">Export JSON</button>
+            <label class="btn" data-i18n-tip="db.importTip"><span data-i18n="db.import">Import JSON</span><input type="file" id="dbImport" accept="application/json" hidden /></label>
+            <button type="button" class="btn" id="btnDbReset" data-tip="Throw away all local edits and restore bundled data.">Reset all overrides</button>
+          </div>
+          <p class="hint" data-i18n="db.hint">Edits stay in this browser (localStorage) and overlay the bundled data. Nothing is sent to a server.</p>
+          <div class="db-table-wrap"><table id="dbTable"></table></div>
+        </div>
+      </div>
+      <div class="stats-bar" id="statsBar">
+        <div class="stat" data-tip="Currently selected simulation year. Same as the scrub slider and the year strip."><span class="stat-label">Year</span><span class="stat-value" id="statYear">—</span></div>
+        <div class="stat" data-tip="Pyramid: this country’s population. Map: sum of all simulated countries in the current year."><span class="stat-label">Total</span><span class="stat-value" id="statTotal">—</span></div>
+        <div class="stat" data-tip="Pyramid: this country’s males. Map / triangle: males in the focused country, not the world total."><span class="stat-label">Male</span><span class="stat-value" id="statMale">—</span></div>
+        <div class="stat" data-tip="Pyramid: this country’s females. Map / triangle: females in the focused country, not the world total."><span class="stat-label">Female</span><span class="stat-value" id="statFemale">—</span></div>
+        <div class="stat" data-tip="Age at which half the population is younger and half is older. On the map this is the focused country."><span class="stat-label">Median age</span><span class="stat-value" id="statMedian">—</span></div>
+        <div class="stat" data-tip="Share aged 0–14. On the map this is the focused country."><span class="stat-label">0–14 %</span><span class="stat-value" id="statYouth">—</span></div>
+        <div class="stat" data-tip="Share aged 65 and over. On the map this is the focused country."><span class="stat-label">65+ %</span><span class="stat-value" id="statElderly">—</span></div>
+        <div class="stat" data-tip="Pyramid: the TFR slider. Map: the focused country’s TFR, not a world average."><span class="stat-label">TFR</span><span class="stat-value" id="statTfr">—</span></div>
+      </div>
+    </main>
+
+    <div class="resize-handle handle-right" id="handleRight" data-tip="Drag to resize the right panel"></div>
+    <div class="edge-btn edge-right" id="edgeRight" data-tip="Show or hide country data graphs">▤</div>
+    <div id="drawerScrim" class="drawer-scrim" hidden></div>
+    <aside class="sidebar right collapsed" id="rightSidebar">
+      <header class="sidebar-header">
+        <h2 data-i18n="nav.countryData">Country data</h2>
+        <p class="subtitle" id="rightSubtitle">Select a country</p>
+      </header>
+      <div id="chartStack" class="chart-stack"></div>
+    </aside>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

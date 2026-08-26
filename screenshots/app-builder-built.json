@@ -1,0 +1,44 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Psychohistory Atlas by Marko Njegomir",
+      "hasCanvas": true,
+      "bodyTextLen": 1361,
+      "bodyTextHash": "772a3cd8bf65fa316bdb6dedf20063bab0b6cc33746a109b3339c437bd7db796",
+      "bodyTextPrefix": "Psychohistory Atlas Pyramid Triangle World map Regions Database ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Psychohistory Atlas by Marko Njegomir",
+      "hasCanvas": true,
+      "bodyTextLen": 1265,
+      "bodyTextHash": "77b2b482502353a91b25e72b276b625b1f937801659ae9ca3970103c7954cc83",
+      "bodyTextPrefix": "☰ Pyramid 🇬🇧 EN ⚙ ▤ COUNTRY & SCENARIO Country — Fertility rat",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [
+    "BRAND WARNING: this looks like a game/canvas app but /workspace/public/og.jpg is missing. Games and visually rich apps must ship a custom 1200x630 share card built from the app's own art — the default og.grok.me placeholder card is not acceptable for them. You are not done: open /workspace/.grok/skills/og/SKILL.md and finish the brand-asset pass.",
+    "BRAND WARNING: this looks like a game/canvas app but src/lib/og/site.json is missing \"type\": \"x:game\". X uses og:type=x:game to present the unfurl as a game card — set it in /workspace/src/lib/og/site.json per /workspace/.grok/skills/og/SKILL.md. Do not invent x:type or overload twitter:card as the game signal."
+  ],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": true,
+  "baselineReasons": [
+    "desktop: body text changed (2323 -> 1361 chars, hash mismatch)",
+    "mobile: body text changed (1850 -> 1265 chars, hash mismatch)"
+  ]
+}
