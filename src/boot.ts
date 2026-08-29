@@ -100,6 +100,7 @@ let seriesAheadCache: { key: string; frames: PyramidFrame[] } | null = null;
 let pyramidMinYear = 2024;
 let countrySearches: ReturnType<typeof initCountrySearch>[] = [];
 let metricSearch: ReturnType<typeof initCountrySearch> | null = null;
+const NONE_METRIC_ID = "__none__";
 let mapFlyEnabled = false;
 let mapRenderPending = false;
 let lastMapBox = "";
@@ -208,11 +209,13 @@ function labelFor(name: string) {
 function fillMetricSelects() {
   const metric = $("mapMetric") as HTMLSelectElement;
   const pivot = $("pivotMetric") as HTMLSelectElement;
-  metric.innerHTML = METRICS.map((m) => `<option value="${m.id}">${t(`metrics.${m.id}.label`)}</option>`).join("");
+  metric.innerHTML =
+    `<option value="">${t("map.metricNone")}</option>` +
+    METRICS.map((m) => `<option value="${m.id}">${t(`metrics.${m.id}.label`)}</option>`).join("");
   pivot.innerHTML =
     `<option value="">${t("map.pivotSame")}</option>` +
     METRICS.map((m) => `<option value="${m.id}">${t("map.pivot")} · ${t(`metrics.${m.id}.label`)}</option>`).join("");
-  metric.value = getState().map.metric;
+  metric.value = getState().map.metric || "";
 }
 
 function fillTagFields() {
@@ -303,20 +306,58 @@ function applyViewPanels(view: ViewMode) {
   applyLayout(getState());
 }
 
+function syncHeatmapChrome() {
+  const on = Boolean(getState().map.metric);
+  const heat = $("heatmapControls");
+  if (heat) heat.hidden = !on;
+  const countryWrap = $("countryFillWrap");
+  if (countryWrap) countryWrap.hidden = on;
+  const headerCountry = $("headerCountryFillWrap");
+  if (headerCountry) headerCountry.hidden = on;
+  const s = getState();
+  setInput("countryFill", s.map.countryFill);
+  setInput("headerCountryFill", s.map.countryFill);
+  setInput("oceanColor", s.map.oceanColor);
+  setInput("headerOcean", s.map.oceanColor);
+  if (!on) {
+    const legend = $("mapLegend");
+    if (legend) {
+      legend.hidden = true;
+      legend.innerHTML = "";
+    }
+  }
+}
+
+function bindPairedColor(ids: string[], key: "countryFill" | "oceanColor") {
+  ids.forEach((id) => {
+    $(id)?.addEventListener("input", (e) => {
+      const v = (e.target as HTMLInputElement).value;
+      ids.forEach((other) => {
+        if (other !== id) setInput(other, v);
+      });
+      updateMap({ [key]: v });
+      render();
+    });
+  });
+}
+
 function syncToolbarMetric() {
   const id = getState().map.metric;
-  if (id) metricSearch?.setValue(id);
+  metricSearch?.setValue(id || NONE_METRIC_ID);
 }
 
 function applyToolbarMetric(id: string) {
+  const metric = id === NONE_METRIC_ID ? "" : id;
   const sel = $("mapMetric") as HTMLSelectElement | null;
-  if (sel) sel.value = id;
-  if (getState().map.metric === id) {
+  if (sel) sel.value = metric;
+  if (getState().map.metric === metric) {
     syncToolbarMetric();
+    syncHeatmapChrome();
     return;
   }
-  updateMap({ metric: id });
+  updateMap({ metric });
   syncToolbarMetric();
+  syncHeatmapChrome();
   const view = getState().view;
   if (view === "map" || view === "regions" || view === "triangle") render();
 }
@@ -328,20 +369,22 @@ function bindMetricCombo() {
   metricSearch = initCountrySearch({
     input,
     list,
-    names: METRICS.map((m) => m.id),
-    labelFor: (n) => t(`metrics.${n}.label`),
+    names: [NONE_METRIC_ID, ...METRICS.map((m) => m.id)],
+    labelFor: (n) => (n === NONE_METRIC_ID ? t("map.metricNone") : t(`metrics.${n}.label`)),
     tokensFor: (n) => {
+      if (n === NONE_METRIC_ID) return "none off solid fill no heatmap";
       const m = METRICS.find((x) => x.id === n);
       return m ? `${m.id} ${t(`metrics.${n}.label`)} ${t(`metrics.${n}.unit`)} ${t(`metrics.${n}.description`)}` : "";
     },
     descriptionFor: (n) => {
+      if (n === NONE_METRIC_ID) return t("map.metricNoneTip");
       const m = METRICS.find((x) => x.id === n);
       if (!m) return "";
       const desc = t(`metrics.${n}.description`);
       const unit = t(`metrics.${n}.unit`);
       return unit ? `${desc} (${unit})` : desc;
     },
-    initial: getState().map.metric,
+    initial: getState().map.metric || NONE_METRIC_ID,
     onSelect: (id) => applyToolbarMetric(id),
   });
 }
@@ -596,8 +639,11 @@ function setView(mode: ViewMode) {
   if (toolbar) toolbar.hidden = view === "help" || view === "database";
   const metricCombo = $("headerMetricCombo");
   if (metricCombo) metricCombo.hidden = !mapish;
+  const headerColors = $("headerMapColors");
+  if (headerColors) headerColors.hidden = !mapish;
   const legend = $("mapLegend");
   if (legend && !mapish) legend.hidden = true;
+  syncHeatmapChrome();
   if (isMobile()) {
     mobileLeft = false;
     mobileRight = false;
@@ -846,6 +892,8 @@ function bindControls() {
     syncMapFromDom();
     render();
   }));
+  bindPairedColor(["countryFill", "headerCountryFill"], "countryFill");
+  bindPairedColor(["oceanColor", "headerOcean"], "oceanColor");
   $("customPivot").addEventListener("change", () => {
     syncMapFromDom();
     render();
@@ -1019,6 +1067,12 @@ function hydrateDomFromState() {
   setInput("tagOpacityNum", s.map.tagOpacity);
   $("statsBar").classList.toggle("hidden", !s.appearance.showStats);
   $("midColorWrap").hidden = s.map.paletteStops === 2;
+  setInput("countryFill", s.map.countryFill);
+  setInput("headerCountryFill", s.map.countryFill);
+  setInput("oceanColor", s.map.oceanColor);
+  setInput("headerOcean", s.map.oceanColor);
+  setInput("mapMetric", s.map.metric || "");
+  syncHeatmapChrome();
   setInput("videoFormat", s.exportOpts.format);
   setInput("exportFps", s.exportOpts.fps);
   syncSurfaceButtons();
@@ -1184,6 +1238,8 @@ function syncMapFromDom() {
   const follow = ($("pivotMetric") as HTMLSelectElement).value === "";
   updateMap({
     metric: ($("mapMetric") as HTMLSelectElement).value,
+    countryFill: ($("countryFill") as HTMLInputElement)?.value || getState().map.countryFill,
+    oceanColor: ($("oceanColor") as HTMLInputElement)?.value || getState().map.oceanColor,
     countrySet: ($("mapCountrySet") as HTMLSelectElement).value as "all" | "tfr2026",
     colorMode: ($("colorMode") as HTMLSelectElement).value as any,
     paletteStops: Number(($("paletteStops") as HTMLSelectElement).value) === 2 ? 2 : 3,
@@ -1212,6 +1268,7 @@ function syncMapFromDom() {
   });
   syncSurfaceButtons();
   syncToolbarMetric();
+  syncHeatmapChrome();
 }
 
 function syncSurfaceButtons() {
@@ -2099,10 +2156,10 @@ function applyAppI18n() {
   if (flag) flag.textContent = def.flag;
   if (code) code.textContent = def.short;
   $("helpBody").innerHTML = getHelpHtml(getLocale());
-  const metricVal = ($("mapMetric") as HTMLSelectElement | null)?.value;
+  const metricVal = ($("mapMetric") as HTMLSelectElement | null)?.value ?? "";
   const pivotVal = ($("pivotMetric") as HTMLSelectElement | null)?.value;
   fillMetricSelects();
-  if (metricVal) ($("mapMetric") as HTMLSelectElement).value = metricVal;
+  ($("mapMetric") as HTMLSelectElement).value = metricVal;
   if (pivotVal != null) ($("pivotMetric") as HTMLSelectElement).value = pivotVal;
   fillTagFields();
   fillCaptureScreens();
@@ -2113,8 +2170,9 @@ function applyAppI18n() {
   });
   if (metricSearch) {
     const v = metricSearch.getValue();
-    if (v) metricSearch.setValue(v);
+    metricSearch.setValue(v || NONE_METRIC_ID);
   }
+  syncHeatmapChrome();
   syncPlayButtons();
   syncNavSheet();
   const c = countries[getState().country];

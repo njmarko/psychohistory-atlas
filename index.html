@@ -115,6 +115,7 @@
           <span data-i18n="map.metric">Heatmap metric</span>
           <select id="mapMetric"></select>
         </label>
+        <div id="heatmapControls">
         <label class="field" data-i18n-tip="map.colorModeTip">
           <span data-i18n="map.colorMode">Color mode</span>
           <select id="colorMode">
@@ -154,6 +155,11 @@
           <label class="field compact" data-i18n-tip="map.belowTip"><span data-i18n="map.below">Below</span><input type="color" id="heatLow" value="#DC2626" /></label>
           <label class="field compact" id="midColorWrap" data-i18n-tip="map.averageTip"><span data-i18n="map.average">Average</span><input type="color" id="heatMid" value="#FFFFFF" /></label>
           <label class="field compact" data-i18n-tip="map.aboveTip"><span data-i18n="map.above">Above</span><input type="color" id="heatHigh" value="#2563EB" /></label>
+        </div>
+        </div>
+        <div class="color-row" id="mapFillColors">
+          <label class="field compact" id="countryFillWrap" hidden data-i18n-tip="map.countryFillTip"><span data-i18n="map.countryFill">Countries</span><input type="color" id="countryFill" value="#334155" /></label>
+          <label class="field compact" data-i18n-tip="map.oceanTip"><span data-i18n="map.ocean">Ocean</span><input type="color" id="oceanColor" value="#111A2F" /></label>
         </div>
         <label class="check" data-i18n-tip="map.useCountryTfrTip"><input type="checkbox" id="useCountryTfr" checked /><span data-i18n="map.useCountryTfr">Use each country’s own TFR</span></label>
         <label class="check" data-i18n-tip="map.useCountryLeTip"><input type="checkbox" id="useCountryLe" checked /><span data-i18n="map.useCountryLe">Use country life expectancy</span></label>
@@ -393,6 +399,16 @@
         <div class="country-combo view-toolbar-combo view-toolbar-metric" id="headerMetricCombo">
           <input type="search" id="headerMetricSearch" class="country-search" placeholder="Heatmap metric…" autocomplete="off" spellcheck="false" aria-label="Heatmap metric" aria-autocomplete="list" aria-expanded="false" data-tip="What each country is colored by on the map and in triangle view" />
           <ul id="headerMetricList" class="country-list" role="listbox" hidden></ul>
+        </div>
+        <div class="view-toolbar-colors" id="headerMapColors" hidden>
+          <label class="view-toolbar-color" id="headerCountryFillWrap" hidden data-i18n-tip="map.countryFillTip">
+            <span data-i18n="map.countryFill">Countries</span>
+            <input type="color" id="headerCountryFill" value="#334155" aria-label="Country fill" />
+          </label>
+          <label class="view-toolbar-color" data-i18n-tip="map.oceanTip">
+            <span data-i18n="map.ocean">Ocean</span>
+            <input type="color" id="headerOcean" value="#111A2F" aria-label="Ocean color" />
+          </label>
         </div>
         <div class="view-toolbar-years" id="headerYears">
           <label class="view-toolbar-year" data-tip="First year of the pyramid run. Cannot precede the age–sex snapshot (usually 2024).">

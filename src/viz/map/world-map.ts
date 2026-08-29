@@ -378,6 +378,10 @@ export function lookAtLonLat(
   };
 }
 
+function oceanFill(state: AppState, bg: string) {
+  return state.map.oceanColor || d3.color(bg)?.brighter(0.3)?.formatHex() || bg;
+}
+
 function buildMapColoring(options: MapRenderOpts) {
   const { state, snapshot, mode } = options;
   const dataByName = mode === "regions" && options.regionSnapshot ? options.regionSnapshot.regions : snapshot.countries;
@@ -386,6 +390,29 @@ function buildMapColoring(options: MapRenderOpts) {
     for (const rec of Object.values(snapshot.countries) as any[]) regionByCountryName[rec.name] = rec.region;
   }
   const metricId = state.map.metric;
+  const countryFill = state.map.countryFill || "#334155";
+  if (!metricId) {
+    return {
+      fillFor: () => countryFill,
+      colorOpts: {
+        mode: state.map.colorMode,
+        paletteStops: state.map.paletteStops,
+        low: countryFill,
+        mid: countryFill,
+        high: countryFill,
+        pivot: 0,
+        extent: 1,
+        extentLow: 1,
+        extentHigh: 1,
+      },
+      seqMin: 0,
+      seqMax: 1,
+      metricId: "",
+      dataByName,
+      regionByCountryName,
+      scale: undefined as string | undefined,
+    };
+  }
   const records = Object.values(dataByName) as any[];
   const vals: { value: number; population: number }[] = [];
   for (const rec of records) {
@@ -529,9 +556,9 @@ export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpt
   scene
     .append("path")
     .datum(sphere)
-    .attr("class", "scene-path")
+    .attr("class", "scene-path ocean-feat")
     .attr("d", path as any)
-    .attr("fill", d3.color(bg)?.brighter(0.3)?.formatHex() || bg)
+    .attr("fill", oceanFill(state, bg))
     .attr("stroke", "#334155")
     .attr("stroke-width", 0.6);
 
@@ -771,6 +798,11 @@ function paintHtmlLegend({
 }: any) {
   const el = document.getElementById("mapLegend");
   if (!el) return;
+  if (!metricId) {
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
   const def = METRIC_BY_ID[metricId];
   const sequential = scale !== "diverging" && (scale === "log" || scale === "zero-linear" || state.map.colorMode === "sequential");
   const three = scale === "diverging" || (!sequential && state.map.paletteStops === 3);

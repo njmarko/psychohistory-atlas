@@ -83,9 +83,15 @@ export const en = {
     countrySetTfr: "Only BirthGauge / 2026 TFR file",
     metric: "Heatmap metric",
     metricTip:
-      "What each country is colored by. In diverging 3-color mode the white midpoint is the average of this metric unless you override the pivot. Absolute population uses a log scale instead.",
+      "What each country is colored by. Choose None for a single country fill instead of a heatmap. In diverging 3-color mode the white midpoint is the average of this metric unless you override the pivot. Absolute population uses a log scale instead.",
+    metricNone: "None (solid fill)",
+    metricNoneTip: "Do not color countries by a statistic. Pick a single country color instead.",
     metricSearch: "Heatmap metric…",
-    metricSearchTip: "What each country is colored by on the map and in triangle view",
+    metricSearchTip: "What each country is colored by on the map and in triangle view. None uses a single fill color.",
+    countryFill: "Countries",
+    countryFillTip: "Fill color for every country when no heatmap metric is selected.",
+    ocean: "Ocean",
+    oceanTip: "Water color on the map and globe. Default matches the current ocean. Does not change the page background.",
     colorMode: "Color mode",
     colorModeTip:
       "Diverging: below vs above the average. Sequential: smallest to largest. TFR vs 2.1 centers on replacement. Dual fills by population share. Absolute population always uses a log fill.",

@@ -22,6 +22,8 @@ function persistUi(state: AppState) {
         layout: state.layout,
         map: {
           metric: state.map.metric,
+          countryFill: state.map.countryFill,
+          oceanColor: state.map.oceanColor,
           colorMode: state.map.colorMode,
           paletteStops: state.map.paletteStops,
           colors: state.map.colors,

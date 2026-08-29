@@ -174,6 +174,8 @@ export type AppState = {
   };
   map: {
     metric: string;
+    countryFill: string;
+    oceanColor: string;
     countrySet: "all" | "tfr2026";
     colorMode: ColorMode;
     paletteStops: 2 | 3;
@@ -294,6 +296,8 @@ export const DEFAULT_STATE: AppState = {
   },
   map: {
     metric: "tfr",
+    countryFill: "#334155",
+    oceanColor: "#111A2F",
     countrySet: "all",
     colorMode: "diverging",
     paletteStops: 3,

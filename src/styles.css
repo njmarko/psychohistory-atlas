@@ -784,6 +784,32 @@ input[type="color"] {
 .view-toolbar-metric[hidden] {
   display: none !important;
 }
+.view-toolbar-colors {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+.view-toolbar-colors[hidden] {
+  display: none !important;
+}
+.view-toolbar-color {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+.view-toolbar-color[hidden] {
+  display: none !important;
+}
+.view-toolbar-color input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 1px;
+  flex: none;
+}
 .view-toolbar-combo .country-list {
   z-index: 60;
 }
@@ -1569,6 +1595,7 @@ body.mode-database .stats-bar {
     grid-template-areas:
       "country play"
       "metric metric"
+      "fills fills"
       "years years";
     padding: 0.35rem 0.5rem;
     gap: 0.35rem;
@@ -1577,6 +1604,7 @@ body.mode-database .stats-bar {
   .view-toolbar-combo { grid-area: country; max-width: none; flex: none; }
   .view-toolbar-metric { grid-area: metric; max-width: none; flex: none; }
   .view-toolbar-metric[hidden] { display: none !important; }
+  .view-toolbar-colors { grid-area: fills; }
   .view-toolbar:has(.view-toolbar-metric[hidden]) {
     grid-template-areas:
       "country play"
