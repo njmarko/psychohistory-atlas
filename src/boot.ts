@@ -2463,7 +2463,7 @@ async function runExport() {
         ? Object.values(worldByCountry)[0].series.length
         : frames.length
       : frames.length;
-  const withGraphs = s.exportOpts.layout === "mapGraphs" || s.exportOpts.layout === "pyramidGraphs";
+  const layout = s.exportOpts.layout;
   try {
     const { blob, ext } = await exportPaintedVideo({
       canvas,
@@ -2482,19 +2482,18 @@ async function runExport() {
         const ctx = c.getContext("2d")!;
         ctx.fillStyle = s.appearance.bgColor;
         ctx.fillRect(0, 0, c.width, c.height);
-        const graphH = withGraphs ? Math.round(height * 0.32) : 0;
-        const mainH = height - graphH;
+        const boxes = exportLayoutBoxes(layout, width, height, view);
         const mapish = view === "triangle" || view === "map" || view === "regions";
         if (mapish) {
           await renderMap();
-          const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, width, mainH);
-          ctx.drawImage(img, 0, 0, width, mainH);
+          const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, boxes.view.w, boxes.view.h);
+          ctx.drawImage(img, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
           if (view === "triangle") {
             const frame = simFrameFor(year);
             if (frame) {
               const series = frames.length ? frames : worldByCountry?.[s.country]?.series || [frame];
               const peaks = trianglePeakScales(series, 0, series.length - 1);
-              const tmp = scratch(width, mainH);
+              const tmp = scratch(boxes.view.w, boxes.view.h);
               drawTriangle(tmp, frame, {
                 ...pyramidOpts(frame),
                 popScale: peaks.pop,
@@ -2503,20 +2502,25 @@ async function runExport() {
                 countryName: displayName(countries[s.country]),
                 overlay: true,
               });
-              ctx.drawImage(tmp, 0, 0, width, mainH);
+              ctx.drawImage(tmp, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
             }
           }
         } else {
           const frame = frames[i] || simFrameFor(year);
           if (frame) {
-            const tmp = scratch(width, mainH);
+            updateStats(frame);
+            const tmp = scratch(boxes.view.w, boxes.view.h);
             drawPyramid(tmp, frame, pyramidOpts(frame));
-            ctx.drawImage(tmp, 0, 0);
+            ctx.drawImage(tmp, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
           }
         }
-        if (withGraphs) {
-          paintGraphs(ctx, 0, mainH, width, graphH);
+        if (boxes.graphs) {
+          paintGraphs(ctx, boxes.graphs.x, boxes.graphs.y, boxes.graphs.w, boxes.graphs.h);
+          ctx.fillStyle = "rgba(51, 65, 85, 0.85)";
+          ctx.fillRect(boxes.graphs.x, 0, 1, height);
         }
+        if (boxes.strip) paintExportYearStrip(ctx, boxes.strip, year);
+        if (boxes.stats) paintExportStats(ctx, boxes.stats);
       },
     });
     const filename = `population_${s.country}_${s.time.startYear}-${s.time.endYear}.${ext}`;
@@ -2543,16 +2547,159 @@ function scratch(w: number, h: number) {
   return c;
 }
 
+type ExportBox = { x: number; y: number; w: number; h: number };
+
+function exportLayoutBoxes(layout: string, width: number, height: number, view: string) {
+  const withGraphs = layout === "mapGraphs" || layout === "pyramidGraphs" || layout === "viewGraphsStats";
+  const withStats = layout === "viewStats" || layout === "viewGraphsStats";
+  const mapish = view === "triangle" || view === "map" || view === "regions";
+  const graphW = withGraphs ? Math.round(width * 0.36) : 0;
+  const colW = width - graphW;
+  const stripH = withStats && mapish ? Math.max(40, Math.round(height * 0.05)) : 0;
+  const statsH = withStats ? Math.max(64, Math.round(height * 0.078)) : 0;
+  const bottomH = stripH + statsH;
+  return {
+    view: { x: 0, y: 0, w: colW, h: height - bottomH } as ExportBox,
+    graphs: withGraphs ? ({ x: colW, y: 0, w: graphW, h: height } as ExportBox) : null,
+    strip: stripH ? ({ x: 0, y: height - bottomH, w: colW, h: stripH } as ExportBox) : null,
+    stats: statsH ? ({ x: 0, y: height - statsH, w: colW, h: statsH } as ExportBox) : null,
+  };
+}
+
 function paintGraphs(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
   const c = countries[getState().country];
   if (!c) return;
-  const tmp = document.createElement("canvas");
-  tmp.style.width = w + "px";
-  tmp.style.height = h + "px";
-  tmp.width = w;
-  tmp.height = h;
-  drawLineChart(tmp, { id: "tfr", title: "TFR", unit: "", points: c.series.tfr, color: "#f472b6" }, { bg: "#0b1220", text: "#e2e8f0", markerYear: getState().time.currentYear });
-  ctx.drawImage(tmp, x, y, w, h);
+  const cfg = getState().charts;
+  const year = getState().time.currentYear;
+  const pointsFor: Record<string, typeof c.series.tfr> = {
+    tfr: c.series.tfr,
+    pop: c.series.population,
+    e0: c.series.e0,
+    mig: c.series.netMigration,
+    ideal: c.series.idealTfr,
+    births: c.series.births || [],
+    inflow: c.series.inflow || [],
+  };
+  const wpp = c.wppMedium;
+  const wppFor: Record<string, typeof c.series.tfr> = {
+    tfr: wpp?.tfr || [],
+    pop: wpp?.population || [],
+    e0: wpp?.e0 || [],
+    mig: wpp?.netMigration || [],
+    births: wpp?.births || [],
+    ideal: [],
+    inflow: [],
+  };
+  const specs = chartSpecs().filter((spec) => (cfg.series[spec.id] || { on: true }).on);
+  if (!specs.length) {
+    ctx.fillStyle = cfg.bg;
+    ctx.fillRect(x, y, w, h);
+    return;
+  }
+  const gap = 2;
+  const each = Math.max(48, Math.floor((h - gap * (specs.length + 1)) / specs.length));
+  specs.forEach((spec, i) => {
+    const gy = y + gap + i * (each + gap);
+    const gh = i === specs.length - 1 ? y + h - gy : each;
+    const tmp = document.createElement("canvas");
+    tmp.width = w;
+    tmp.height = gh;
+    const seriesOpt = cfg.series[spec.id] || { on: true, color: "#38bdf8" };
+    const overlayPts = cfg.showWpp ? wppFor[spec.id] || [] : [];
+    drawLineChart(
+      tmp,
+      {
+        id: spec.id,
+        title: spec.title,
+        unit: spec.unit,
+        points: pointsFor[spec.id] || [],
+        color: seriesOpt.color,
+      },
+      {
+        bg: cfg.bg,
+        text: cfg.text,
+        markerYear: year,
+        overlay: overlayPts.length
+          ? { id: spec.id + "-wpp", title: spec.title, unit: spec.unit, points: overlayPts, color: cfg.wppColor }
+          : null,
+      }
+    );
+    ctx.drawImage(tmp, x, gy, w, gh);
+  });
+}
+
+function paintExportStats(ctx: CanvasRenderingContext2D, box: ExportBox) {
+  const { x, y, w, h } = box;
+  ctx.fillStyle = "rgba(15, 23, 42, 0.94)";
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = "rgba(51, 65, 85, 0.95)";
+  ctx.fillRect(x, y, w, 1);
+  const items: [string, string][] = [
+    [t("stats.year"), $("statYear").textContent || "—"],
+    [t("stats.total"), $("statTotal").textContent || "—"],
+    [t("stats.male"), $("statMale").textContent || "—"],
+    [t("stats.female"), $("statFemale").textContent || "—"],
+    [t("stats.median"), $("statMedian").textContent || "—"],
+    [t("stats.youth"), $("statYouth").textContent || "—"],
+    [t("stats.elderly"), $("statElderly").textContent || "—"],
+    [t("stats.tfr"), $("statTfr").textContent || "—"],
+  ];
+  const slot = w / items.length;
+  items.forEach(([label, value], i) => {
+    const cx = x + slot * (i + 0.5);
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = `600 ${Math.round(h * 0.2)}px "DM Sans", system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(label.toUpperCase(), cx, y + h * 0.14);
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = `500 ${Math.round(h * 0.34)}px "JetBrains Mono", monospace`;
+    ctx.fillText(value, cx, y + h * 0.44);
+  });
+}
+
+function paintExportYearStrip(ctx: CanvasRenderingContext2D, box: ExportBox, current: number) {
+  const { x, y, w, h } = box;
+  const years = yearsInRange();
+  const min = years[0];
+  const max = years[years.length - 1] ?? min;
+  const span = Math.max(1, max - min);
+  ctx.fillStyle = "rgba(15, 23, 42, 0.94)";
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = "rgba(51, 65, 85, 0.95)";
+  ctx.fillRect(x, y, w, 1);
+  const pad = Math.max(18, w * 0.03);
+  const xOf = (yr: number) => x + pad + ((yr - min) / span) * (w - pad * 2);
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x + pad, y + h * 0.68);
+  ctx.lineTo(x + w - pad, y + h * 0.68);
+  ctx.stroke();
+  const step = span > 80 ? 10 : span > 40 ? 5 : 1;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.font = `500 ${Math.round(h * 0.26)}px "JetBrains Mono", monospace`;
+  for (let yr = min; yr <= max; yr += step) {
+    const px = xOf(yr);
+    ctx.fillStyle = "#475569";
+    ctx.fillRect(px, y + h * 0.56, 1, h * 0.2);
+    if (yr === min || yr === max || yr % (step * (span > 80 ? 2 : 1)) === 0) {
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText(String(yr), px, y + 3);
+    }
+  }
+  const cx = xOf(current);
+  ctx.fillStyle = "#fbbf24";
+  ctx.beginPath();
+  ctx.moveTo(cx, y + h * 0.5);
+  ctx.lineTo(cx - 6, y + h * 0.22);
+  ctx.lineTo(cx + 6, y + h * 0.22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillRect(cx - 1.5, y + h * 0.5, 3, h * 0.32);
+  ctx.font = `700 ${Math.round(h * 0.3)}px "DM Sans", system-ui, sans-serif`;
+  ctx.fillText(String(current), cx, y + 2);
 }
 
 async function svgToImage(svg: SVGSVGElement, w: number, h: number) {

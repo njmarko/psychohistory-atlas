@@ -132,7 +132,8 @@ let state: AppState = {
     const e = { ...DEFAULT_STATE.exportOpts, ...(loadUi().exportOpts ?? {}) };
     if (e.format === "webm") e.format = DEFAULT_STATE.exportOpts.format;
     if (e.fps === 30) e.fps = DEFAULT_STATE.exportOpts.fps;
-    if (e.layout !== "single" && e.layout !== "mapGraphs") e.layout = "single";
+    if (e.layout === "pyramidGraphs" || e.layout === "splitH" || e.layout === "splitV") e.layout = "mapGraphs";
+    if (e.layout !== "single" && e.layout !== "mapGraphs" && e.layout !== "viewStats" && e.layout !== "viewGraphsStats") e.layout = "single";
     return e;
   })(),
   time: { ...DEFAULT_STATE.time, ...((loadUi() as any).time ?? {}) },

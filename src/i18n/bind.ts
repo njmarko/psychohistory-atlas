@@ -168,7 +168,7 @@ export const I18N_PLACEHOLDER: [string, string][] = [
 ];
 
 export const I18N_OPTIONS: [string, Record<string, string>][] = [
-  ["#exportLayout", { single: "export.single", mapGraphs: "export.mapGraphs" }],
+  ["#exportLayout", { single: "export.single", mapGraphs: "export.mapGraphs", viewStats: "export.viewStats", viewGraphsStats: "export.viewGraphsStats" }],
   ["#exportRes", { custom: "export.custom" }],
   ["#videoFormat", { mp4: "export.mp4", webm: "export.webm" }],
 ];

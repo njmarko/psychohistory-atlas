@@ -121,7 +121,7 @@ export type CaptureScreen =
   | "yearStrip"
   | "pins";
 
-export type ExportLayout = "single" | "splitH" | "splitV" | "mapGraphs" | "pyramidGraphs";
+export type ExportLayout = "single" | "splitH" | "splitV" | "mapGraphs" | "pyramidGraphs" | "viewStats" | "viewGraphsStats";
 export type AspectRatio = "16:9" | "9:16" | "1:1" | "4:3" | "21:9";
 
 export type MapPivot = {
