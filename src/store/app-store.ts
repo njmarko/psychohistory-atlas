@@ -22,6 +22,7 @@ function persistUi(state: AppState) {
         layout: state.layout,
         map: {
           metric: state.map.metric,
+          metricByView: state.map.metricByView,
           countryFill: state.map.countryFill,
           oceanColor: state.map.oceanColor,
           colorMode: state.map.colorMode,
@@ -105,7 +106,15 @@ let state: AppState = {
             ? Number(saved.hoverSpan)
             : DEFAULT_STATE.map.hoverSpanYears;
     const hoverSpanYears = rawSpan === 20 || rawSpan === 50 ? 100 : rawSpan;
-    return { ...DEFAULT_STATE.map, ...(saved ?? {}), hoverSpanYears };
+    const savedFill = String((saved ?? {}).countryFill || "").toLowerCase();
+    const countryFill = !savedFill || savedFill === "#334155" ? DEFAULT_STATE.map.countryFill : (saved as any).countryFill;
+    return {
+      ...DEFAULT_STATE.map,
+      ...(saved ?? {}),
+      hoverSpanYears,
+      countryFill,
+      metricByView: { ...DEFAULT_STATE.map.metricByView, ...((saved as any)?.metricByView ?? {}) },
+    };
   })(),
   appearance: { ...DEFAULT_STATE.appearance, ...(loadUi().appearance ?? {}) },
   hover: (() => {

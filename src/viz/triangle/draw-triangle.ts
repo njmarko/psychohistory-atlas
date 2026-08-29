@@ -162,9 +162,9 @@ export function drawTriangle(
     outlineWidth,
   });
 
-  drawInnerCaption(ctx, tri.sides.left, t("canvas.population"), formatNumber(total), ink, outline, outlineColor, outlineWidth);
-  drawInnerCaption(ctx, tri.sides.right, t("canvas.mortality"), formatNumber(deathTotal), ink, outline, outlineColor, outlineWidth);
-  drawInnerCaption(ctx, tri.sides.bottom, t("canvas.fertility"), formatNumber(birthTotal), ink, outline, outlineColor, outlineWidth);
+  drawInnerCaption(ctx, tri.sides.left, t("canvas.population"), formatNumber(total), ink, outline, outlineColor, outlineWidth, H);
+  drawInnerCaption(ctx, tri.sides.right, t("canvas.mortality"), formatNumber(deathTotal), ink, outline, outlineColor, outlineWidth, H);
+  drawInnerCaption(ctx, tri.sides.bottom, t("canvas.fertility"), formatNumber(birthTotal), ink, outline, outlineColor, outlineWidth, H);
 }
 
 function sum(a: number[]) {
@@ -295,7 +295,7 @@ function drawSidePyramid(
   }
 
   ctx.fillStyle = ink;
-  ctx.font = `500 ${Math.max(8, Math.round(barDepth * 0.42))}px "JetBrains Mono", monospace`;
+  ctx.font = `500 ${Math.max(10, Math.round(barDepth * 0.55))}px "JetBrains Mono", monospace`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   for (let g = 0; g < n; g++) {
@@ -319,12 +319,13 @@ function drawInnerCaption(
   ink: string,
   outline: boolean,
   outlineColor: string,
-  outlineWidth: number
+  outlineWidth: number,
+  canvasH: number
 ) {
   const angle = readableAngle(Math.atan2(side.tangent.y, side.tangent.x));
-  const wordSize = 14;
-  const numSize = 13;
-  const line = wordSize + 5;
+  const wordSize = Math.max(18, Math.round(canvasH * 0.032));
+  const numSize = Math.max(16, Math.round(canvasH * 0.028));
+  const line = wordSize + 6;
   const below = { x: -Math.sin(angle), y: Math.cos(angle) };
   const belowIsOutward = below.x * side.outward.x + below.y * side.outward.y > 0;
   const inwardPad = 16 + (belowIsOutward ? line + 6 : 8);

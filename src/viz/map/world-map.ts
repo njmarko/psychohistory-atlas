@@ -390,7 +390,7 @@ function buildMapColoring(options: MapRenderOpts) {
     for (const rec of Object.values(snapshot.countries) as any[]) regionByCountryName[rec.name] = rec.region;
   }
   const metricId = state.map.metric;
-  const countryFill = state.map.countryFill || "#334155";
+  const countryFill = state.map.countryFill || "#5A7A94";
   if (!metricId) {
     return {
       fillFor: () => countryFill,
@@ -523,7 +523,26 @@ export function recolorLiveMap(options: MapRenderOpts) {
     state: options.state,
     scale: coloring.scale,
   });
+  refreshLivePins(options);
+  live.refreshHub();
   return true;
+}
+
+function refreshLivePins(options: MapRenderOpts) {
+  if (!live) return;
+  const { snapshot, mode, state } = options;
+  const dataByName = mode === "regions" && options.regionSnapshot ? options.regionSnapshot.regions : snapshot.countries;
+  live.scene.selectAll("g.selection-pin").each(function (this: SVGGElement) {
+    const name = this.getAttribute("data-pin-name");
+    if (!name) return;
+    const rec = (dataByName as any)[name];
+    if (!rec) return;
+    const lines = tagLines(rec, state.map.tagFields, mode);
+    const texts = this.querySelectorAll("text.pin-line");
+    texts.forEach((node, i) => {
+      node.textContent = lines[i] || "";
+    });
+  });
 }
 
 export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpts) {
@@ -926,7 +945,7 @@ function drawPins(
     let curDx = userOff.dx || 0;
     let curDy = userOff.dy || 0;
 
-    const pin = g.append("g").attr("class", "selection-pin").style("cursor", "grab");
+    const pin = g.append("g").attr("class", "selection-pin").attr("data-pin-name", selectedName).style("cursor", "grab");
     const stem = pin
       .append("line")
       .attr("x2", centroid[0])
@@ -951,6 +970,7 @@ function drawPins(
     lines.forEach((line: string, i: number) => {
       card
         .append("text")
+        .attr("class", "pin-line")
         .attr("x", i === 0 ? textLeft : defX + 10)
         .attr("y", defY + 18 + i * 16)
         .attr("fill", i === 0 ? "#f8fafc" : "#fbbf24")

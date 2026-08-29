@@ -306,19 +306,48 @@ function applyViewPanels(view: ViewMode) {
   applyLayout(getState());
 }
 
+function mapishMetricKey(view: ViewMode): "map" | "regions" | "triangle" | null {
+  if (view === "map" || view === "regions" || view === "triangle") return view;
+  return null;
+}
+
+function applyMetricForView(view: ViewMode) {
+  const key = mapishMetricKey(view);
+  if (!key) return;
+  const metric = getState().map.metricByView[key] ?? (key === "triangle" ? "" : "tfr");
+  const sel = $("mapMetric") as HTMLSelectElement | null;
+  if (sel) sel.value = metric;
+  if (getState().map.metric !== metric) updateMap({ metric });
+}
+
+function rememberMetricForView(metric: string) {
+  const key = mapishMetricKey(getState().view) || "map";
+  updateMap({ metric, metricByView: { ...getState().map.metricByView, [key]: metric } });
+}
+
+function applyPageBackground(color: string) {
+  const c = color || "#0F172A";
+  document.documentElement.style.setProperty("--bg", c);
+  document.body.style.background = c;
+}
+
 function syncHeatmapChrome() {
-  const on = Boolean(getState().map.metric);
+  const s = getState();
+  const mapish = s.view === "map" || s.view === "regions" || s.view === "triangle";
+  const on = Boolean(s.map.metric);
   const heat = $("heatmapControls");
   if (heat) heat.hidden = !on;
   const countryWrap = $("countryFillWrap");
-  if (countryWrap) countryWrap.hidden = on;
+  if (countryWrap) countryWrap.hidden = !mapish || on;
   const headerCountry = $("headerCountryFillWrap");
-  if (headerCountry) headerCountry.hidden = on;
-  const s = getState();
+  if (headerCountry) headerCountry.hidden = !mapish || on;
+  const oceanWrap = $("headerOceanWrap");
+  if (oceanWrap) oceanWrap.hidden = !mapish;
   setInput("countryFill", s.map.countryFill);
   setInput("headerCountryFill", s.map.countryFill);
   setInput("oceanColor", s.map.oceanColor);
   setInput("headerOcean", s.map.oceanColor);
+  setInput("headerBg", s.appearance.bgColor);
   if (!on) {
     const legend = $("mapLegend");
     if (legend) {
@@ -350,12 +379,7 @@ function applyToolbarMetric(id: string) {
   const metric = id === NONE_METRIC_ID ? "" : id;
   const sel = $("mapMetric") as HTMLSelectElement | null;
   if (sel) sel.value = metric;
-  if (getState().map.metric === metric) {
-    syncToolbarMetric();
-    syncHeatmapChrome();
-    return;
-  }
-  updateMap({ metric });
+  rememberMetricForView(metric);
   syncToolbarMetric();
   syncHeatmapChrome();
   const view = getState().view;
@@ -637,10 +661,11 @@ function setView(mode: ViewMode) {
   stopPlayback();
   const toolbar = $("viewToolbar");
   if (toolbar) toolbar.hidden = view === "help" || view === "database";
+  applyMetricForView(view);
   const metricCombo = $("headerMetricCombo");
   if (metricCombo) metricCombo.hidden = !mapish;
   const headerColors = $("headerMapColors");
-  if (headerColors) headerColors.hidden = !mapish;
+  if (headerColors) headerColors.hidden = view === "help" || view === "database";
   const legend = $("mapLegend");
   if (legend && !mapish) legend.hidden = true;
   syncHeatmapChrome();
@@ -802,9 +827,21 @@ function bindControls() {
     "triangleTextColor",
   ].forEach((id) => {
     $(id).addEventListener("input", () => {
+      if (id === "bgColor") {
+        const v = ($("bgColor") as HTMLInputElement).value;
+        setInput("headerBg", v);
+        applyPageBackground(v);
+      }
       syncAppearanceFromDom();
       render();
     });
+  });
+  $("headerBg")?.addEventListener("input", () => {
+    const v = ($("headerBg") as HTMLInputElement).value;
+    setInput("bgColor", v);
+    applyPageBackground(v);
+    syncAppearanceFromDom();
+    render();
   });
   ["pyramidBands", "trianglePopBands", "triangleMortBands", "triangleFertBands"].forEach((id) => {
     $(id).addEventListener("change", () => {
@@ -1011,6 +1048,8 @@ function hydrateDomFromState() {
   setInput("maleColor", s.appearance.maleColor);
   setInput("femaleColor", s.appearance.femaleColor);
   setInput("bgColor", s.appearance.bgColor);
+  setInput("headerBg", s.appearance.bgColor);
+  applyPageBackground(s.appearance.bgColor);
   setInput("textColor", s.appearance.textColor);
   setInput("showFlag", s.appearance.showFlag);
   setInput("flagWindow", s.appearance.flagWindow);
@@ -1236,8 +1275,11 @@ function syncYearChrome(year: number) {
 
 function syncMapFromDom() {
   const follow = ($("pivotMetric") as HTMLSelectElement).value === "";
+  const metric = ($("mapMetric") as HTMLSelectElement).value;
+  const key = mapishMetricKey(getState().view) || "map";
   updateMap({
-    metric: ($("mapMetric") as HTMLSelectElement).value,
+    metric,
+    metricByView: { ...getState().map.metricByView, [key]: metric },
     countryFill: ($("countryFill") as HTMLInputElement)?.value || getState().map.countryFill,
     oceanColor: ($("oceanColor") as HTMLInputElement)?.value || getState().map.oceanColor,
     countrySet: ($("mapCountrySet") as HTMLSelectElement).value as "all" | "tfr2026",

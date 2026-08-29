@@ -214,7 +214,7 @@ export function drawPyramid(
       const val = maxVal * frac;
       const label = showPercent ? ((val / total) * 100).toFixed(1) + "%" : formatCompact(val);
       ctx.fillStyle = muted;
-      ctx.font = `400 ${Math.round(H * 0.014)}px "JetBrains Mono", monospace`;
+      ctx.font = `400 ${Math.round(H * 0.018)}px "JetBrains Mono", monospace`;
       ctx.textAlign = "center";
       ctx.fillText(label, xL, padT + chartH + Math.round(H * 0.025));
       ctx.fillText(label, xR, padT + chartH + Math.round(H * 0.025));
@@ -306,13 +306,13 @@ export function drawPyramid(
     const fW = Math.min(halfW, (fVal / maxVal) * halfW);
     if (showAgeLabels) {
       ctx.fillStyle = textColor;
-      ctx.font = `500 ${Math.round(Math.min(barH * 0.72, ageSize ? ageSize * dpr : H * 0.016))}px "JetBrains Mono", monospace`;
+      ctx.font = `500 ${Math.round(Math.min(barH * 0.88, ageSize ? ageSize * dpr : H * 0.022))}px "JetBrains Mono", monospace`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       fillOutlined(ctx, ageLabels[g], centerX, y + h / 2, outline, outlineColor, outlineWidth);
     }
     if (showCounts) {
-      const countFont = Math.round(Math.min(barH * 0.5, H * 0.0145));
+      const countFont = Math.round(Math.min(barH * 0.7, H * 0.02));
       ctx.font = `400 ${countFont}px "JetBrains Mono", monospace`;
       ctx.textBaseline = "middle";
       const mLabel = showPercent ? ((mVal / total) * 100).toFixed(2) + "%" : formatNumber(mVal);

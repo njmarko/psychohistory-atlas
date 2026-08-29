@@ -638,6 +638,11 @@ input[type="color"] {
   gap: 0.6rem;
 }
 
+#heatmapControls[hidden],
+#countryFillWrap[hidden] {
+  display: none !important;
+}
+
 .check {
   display: flex;
   align-items: center;
@@ -1606,6 +1611,12 @@ body.mode-database .stats-bar {
   .view-toolbar-metric[hidden] { display: none !important; }
   .view-toolbar-colors { grid-area: fills; }
   .view-toolbar:has(.view-toolbar-metric[hidden]) {
+    grid-template-areas:
+      "country play"
+      "fills fills"
+      "years years";
+  }
+  .view-toolbar:has(.view-toolbar-metric[hidden]):has(.view-toolbar-colors[hidden]) {
     grid-template-areas:
       "country play"
       "years years";

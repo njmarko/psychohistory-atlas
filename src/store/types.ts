@@ -174,6 +174,7 @@ export type AppState = {
   };
   map: {
     metric: string;
+    metricByView: Record<"map" | "regions" | "triangle", string>;
     countryFill: string;
     oceanColor: string;
     countrySet: "all" | "tfr2026";
@@ -296,7 +297,8 @@ export const DEFAULT_STATE: AppState = {
   },
   map: {
     metric: "tfr",
-    countryFill: "#334155",
+    metricByView: { map: "tfr", regions: "tfr", triangle: "" },
+    countryFill: "#5A7A94",
     oceanColor: "#111A2F",
     countrySet: "all",
     colorMode: "diverging",

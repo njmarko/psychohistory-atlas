@@ -158,7 +158,7 @@
         </div>
         </div>
         <div class="color-row" id="mapFillColors">
-          <label class="field compact" id="countryFillWrap" hidden data-i18n-tip="map.countryFillTip"><span data-i18n="map.countryFill">Countries</span><input type="color" id="countryFill" value="#334155" /></label>
+          <label class="field compact" id="countryFillWrap" hidden data-i18n-tip="map.countryFillTip"><span data-i18n="map.countryFill">Countries</span><input type="color" id="countryFill" value="#5A7A94" /></label>
           <label class="field compact" data-i18n-tip="map.oceanTip"><span data-i18n="map.ocean">Ocean</span><input type="color" id="oceanColor" value="#111A2F" /></label>
         </div>
         <label class="check" data-i18n-tip="map.useCountryTfrTip"><input type="checkbox" id="useCountryTfr" checked /><span data-i18n="map.useCountryTfr">Use each country’s own TFR</span></label>
@@ -400,12 +400,16 @@
           <input type="search" id="headerMetricSearch" class="country-search" placeholder="Heatmap metric…" autocomplete="off" spellcheck="false" aria-label="Heatmap metric" aria-autocomplete="list" aria-expanded="false" data-tip="What each country is colored by on the map and in triangle view" />
           <ul id="headerMetricList" class="country-list" role="listbox" hidden></ul>
         </div>
-        <div class="view-toolbar-colors" id="headerMapColors" hidden>
+        <div class="view-toolbar-colors" id="headerMapColors">
+          <label class="view-toolbar-color" data-i18n-tip="appearance.bgTip">
+            <span data-i18n="appearance.bg">Background</span>
+            <input type="color" id="headerBg" value="#0F172A" aria-label="Page background" />
+          </label>
           <label class="view-toolbar-color" id="headerCountryFillWrap" hidden data-i18n-tip="map.countryFillTip">
             <span data-i18n="map.countryFill">Countries</span>
-            <input type="color" id="headerCountryFill" value="#334155" aria-label="Country fill" />
+            <input type="color" id="headerCountryFill" value="#5A7A94" aria-label="Country fill" />
           </label>
-          <label class="view-toolbar-color" data-i18n-tip="map.oceanTip">
+          <label class="view-toolbar-color" id="headerOceanWrap" hidden data-i18n-tip="map.oceanTip">
             <span data-i18n="map.ocean">Ocean</span>
             <input type="color" id="headerOcean" value="#111A2F" aria-label="Ocean color" />
           </label>

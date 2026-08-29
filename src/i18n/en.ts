@@ -232,7 +232,7 @@ export const en = {
     female: "Female",
     femaleTip: "Female bar color when the flag window is not painting the bars (and Flag colors is off).",
     bg: "Background",
-    bgTip: "Canvas and map background, also used in exported video.",
+    bgTip: "Page, canvas, and map background. Also used in exported video.",
     text: "Text",
     textTip: "Titles, age labels, and axis text.",
     showFlag: "Show country flag next to name",
