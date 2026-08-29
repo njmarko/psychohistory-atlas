@@ -185,6 +185,7 @@ export function flyToLonLat(lon: number, lat: number, durationMs = 500): Promise
         ];
         live.projection.rotate(next);
         live.scene.selectAll(".scene-path").attr("d", live.path as any);
+        reprojectLivePins();
         live.options.onRotate?.(next);
       } else {
         live.pan = [
@@ -220,6 +221,7 @@ export function nudgeLiveMap(dx: number, dy: number): string | null {
     const next: [number, number, number] = [r[0] + dx * k, r[1] - dy * k, r[2]];
     live.projection.rotate(next);
     live.scene.selectAll(".scene-path").attr("d", live.path as any);
+    reprojectLivePins();
     live.options.onRotate?.(next);
   } else {
     live.pan = [live.pan[0] + dx, live.pan[1] + dy];
@@ -531,6 +533,7 @@ export function recolorLiveMap(options: MapRenderOpts) {
     scale: coloring.scale,
   });
   refreshLivePins(options);
+  reprojectLivePins();
   live.refreshHub();
   return true;
 }
@@ -747,6 +750,7 @@ export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpt
           const next: [number, number, number] = [r[0] + event.dx * k, r[1] - event.dy * k, r[2]];
           projection.rotate(next);
           scene.selectAll(".scene-path").attr("d", path as any);
+          reprojectLivePins();
           options.onRotate?.(next);
         } else {
           pan = [pan[0] + event.dx, pan[1] + event.dy];
@@ -908,6 +912,112 @@ function mainlandFeature(f: any) {
   };
 }
 
+function pinGeoForSelection(
+  selectedName: string,
+  mode: string,
+  path: any,
+  features: any[],
+  indexes: ReturnType<typeof buildIndexes>,
+  snapshot: any,
+  dataByName: any,
+  regionByCountryName: Record<string, string>
+): { rec: any; lon: number; lat: number; centroid: [number, number] } | null {
+  const proj = path.projection?.();
+  const project = (lon: number, lat: number): [number, number] | null => {
+    const xy = proj && Number.isFinite(lon) ? proj([lon, lat]) : null;
+    if (xy && Number.isFinite(xy[0]) && Number.isFinite(xy[1])) return xy as [number, number];
+    return null;
+  };
+  if (mode === "regions") {
+    const rec = dataByName[selectedName];
+    if (!rec) return null;
+    let slon = 0, slat = 0, sw = 0;
+    for (const f of features) {
+      const name = resolveDataName(f.properties || {}, indexes, f.id);
+      if (!name || regionByCountryName[name] !== selectedName) continue;
+      const main = mainlandFeature(f);
+      const a = d3.geoArea(main as any);
+      const ll = d3.geoCentroid(main as any) as [number, number];
+      if (!a || !Number.isFinite(ll[0])) continue;
+      slon += ll[0] * a;
+      slat += ll[1] * a;
+      sw += a;
+    }
+    if (sw <= 0) return null;
+    const lon = slon / sw;
+    const lat = slat / sw;
+    const centroid = project(lon, lat);
+    if (!centroid) return null;
+    return { rec, lon, lat, centroid };
+  }
+  const rec = snapshot.countries[selectedName];
+  if (!rec) return null;
+  let best: any = null, bestArea = -1;
+  for (const f of features) {
+    const name = resolveDataName(f.properties || {}, indexes, f.id);
+    if (name !== selectedName) continue;
+    const a = d3.geoArea(f);
+    if (a > bestArea) {
+      bestArea = a;
+      best = f;
+    }
+  }
+  if (!best) return null;
+  const main = mainlandFeature(best);
+  const ll = d3.geoCentroid(main as any) as [number, number];
+  if (!Number.isFinite(ll[0])) return null;
+  const centroid = project(ll[0], ll[1]) || (path.centroid(main) as [number, number]);
+  if (!centroid || !Number.isFinite(centroid[0])) return null;
+  return { rec, lon: ll[0], lat: ll[1], centroid };
+}
+
+function pinOnFront(lon: number, lat: number, projection: any) {
+  const rot = (projection.rotate?.() || [0, 0, 0]) as [number, number, number];
+  const center: [number, number] = [-rot[0], -rot[1]];
+  return d3.geoDistance([lon, lat], center) <= Math.PI / 2 - 1e-4;
+}
+
+function layoutPinStem(el: SVGGElement, cx: number, cy: number) {
+  const defX = Number(el.getAttribute("data-def-x"));
+  const defY = Number(el.getAttribute("data-def-y"));
+  const boxW = Number(el.getAttribute("data-box-w"));
+  const boxH = Number(el.getAttribute("data-box-h"));
+  const card = el.querySelector(":scope > g");
+  const t = card?.getAttribute("transform") || "";
+  const m = /translate\(\s*([^,\s]+)[,\s]+([^)]+)\)/.exec(t);
+  const dx = m ? Number(m[1]) : 0;
+  const dy = m ? Number(m[2]) : 0;
+  const x1 = Math.max(defX + dx + 8, Math.min(defX + dx + boxW - 8, cx));
+  const y1 = defY + dy + boxH;
+  const stem = el.querySelector("line.pin-stem");
+  const dot = el.querySelector("circle.pin-dot");
+  stem?.setAttribute("x1", String(x1));
+  stem?.setAttribute("y1", String(y1));
+  stem?.setAttribute("x2", String(cx));
+  stem?.setAttribute("y2", String(cy));
+  dot?.setAttribute("cx", String(cx));
+  dot?.setAttribute("cy", String(cy));
+}
+
+function reprojectLivePins() {
+  if (!live) return;
+  const proj = live.projection;
+  if (!proj) return;
+  live.scene.selectAll("g.selection-pin").each(function (this: SVGGElement) {
+    const lon = Number(this.getAttribute("data-lon"));
+    const lat = Number(this.getAttribute("data-lat"));
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+    const xy = proj([lon, lat]) as [number, number] | null;
+    const hidden = !xy || !Number.isFinite(xy[0]) || (live!.surface === "globe" && !pinOnFront(lon, lat, proj));
+    if (hidden) this.setAttribute("display", "none");
+    else this.removeAttribute("display");
+    if (hidden || !xy) return;
+    this.setAttribute("data-cx", String(xy[0]));
+    this.setAttribute("data-cy", String(xy[1]));
+    layoutPinStem(this, xy[0], xy[1]);
+  });
+}
+
 function drawPins(
   g: any,
   {
@@ -931,45 +1041,18 @@ function drawPins(
 ) {
   const names = [...selectedSet].sort();
   for (const selectedName of names) {
-    let rec: any = null;
-    let centroid: [number, number] | null = null;
-    if (mode === "regions") {
-      rec = dataByName[selectedName];
-      let sx = 0, sy = 0, sw = 0;
-      for (const f of features) {
-        const name = resolveDataName(f.properties || {}, indexes, f.id);
-        if (!name || regionByCountryName[name] !== selectedName) continue;
-        const a = Math.abs(path.area(f));
-        const c = path.centroid(f);
-        if (!a || !Number.isFinite(c[0])) continue;
-        sx += c[0] * a;
-        sy += c[1] * a;
-        sw += a;
-      }
-      if (sw > 0) centroid = [sx / sw, sy / sw];
-    } else {
-      rec = snapshot.countries[selectedName];
-      let best: any = null, bestArea = -1;
-      for (const f of features) {
-        const name = resolveDataName(f.properties || {}, indexes, f.id);
-        if (name !== selectedName) continue;
-        const a = Math.abs(path.area(f));
-        if (a > bestArea) {
-          bestArea = a;
-          best = f;
-        }
-      }
-      if (best) {
-        const main = mainlandFeature(best);
-        const ll = d3.geoCentroid(main as any) as [number, number];
-        const proj = path.projection?.();
-        const xy = proj && ll && Number.isFinite(ll[0]) ? proj(ll) : path.centroid(main);
-        if (xy && Number.isFinite(xy[0]) && Number.isFinite(xy[1])) {
-          centroid = xy as [number, number];
-        }
-      }
-    }
-    if (!rec || !centroid || !Number.isFinite(centroid[0])) continue;
+    const anchor = pinGeoForSelection(
+      selectedName,
+      mode,
+      path,
+      features,
+      indexes,
+      snapshot,
+      dataByName,
+      regionByCountryName
+    );
+    if (!anchor) continue;
+    const { rec, lon, lat, centroid } = anchor;
 
     const lines = tagLines(rec, tagFields, mode);
     const boxW = 200;
@@ -987,8 +1070,18 @@ function drawPins(
     let curDy = userOff.dy || 0;
 
     const pin = g.append("g").attr("class", "selection-pin").attr("data-pin-name", selectedName).style("cursor", "grab");
+    pin
+      .attr("data-lon", lon)
+      .attr("data-lat", lat)
+      .attr("data-cx", centroid[0])
+      .attr("data-cy", centroid[1])
+      .attr("data-def-x", defX)
+      .attr("data-def-y", defY)
+      .attr("data-box-w", boxW)
+      .attr("data-box-h", boxH);
     const stem = pin
       .append("line")
+      .attr("class", "pin-stem")
       .attr("x2", centroid[0])
       .attr("y2", centroid[1])
       .attr("stroke", "#fbbf24")
@@ -996,7 +1089,7 @@ function drawPins(
       .attr("stroke-dasharray", "3 2")
       .attr("opacity", tagOpacity)
       .style("pointer-events", "none");
-    pin.append("circle").attr("cx", centroid[0]).attr("cy", centroid[1]).attr("r", 4).attr("fill", "#fbbf24").attr("opacity", tagOpacity).style("pointer-events", "none");
+    pin.append("circle").attr("class", "pin-dot").attr("cx", centroid[0]).attr("cy", centroid[1]).attr("r", 4).attr("fill", "#fbbf24").attr("opacity", tagOpacity).style("pointer-events", "none");
 
     const card = pin.append("g").attr("transform", `translate(${curDx},${curDy})`).attr("opacity", tagOpacity);
     card.append("rect").attr("x", defX).attr("y", defY).attr("width", boxW).attr("height", boxH).attr("rx", 8).attr("fill", "rgba(15,23,42,0.94)").attr("stroke", "#fbbf24").attr("stroke-width", 1.5);
@@ -1021,8 +1114,12 @@ function drawPins(
         .text(line);
     });
 
+    const pinNode = pin.node() as SVGGElement;
     const updateStem = (dx: number, dy: number) => {
-      stem.attr("x1", Math.max(defX + dx + 8, Math.min(defX + dx + boxW - 8, centroid![0]))).attr("y1", defY + dy + boxH);
+      card.attr("transform", `translate(${dx},${dy})`);
+      const cx = Number(pinNode.getAttribute("data-cx")) || centroid[0];
+      const cy = Number(pinNode.getAttribute("data-cy")) || centroid[1];
+      layoutPinStem(pinNode, cx, cy);
     };
     updateStem(curDx, curDy);
     card.call(
@@ -1041,7 +1138,6 @@ function drawPins(
           const ny = Math.max(visTop, Math.min(visBottom - boxH, defY + curDy));
           curDx = nx - defX;
           curDy = ny - defY;
-          card.attr("transform", `translate(${curDx},${curDy})`);
           updateStem(curDx, curDy);
           onPinDrag(selectedName, { dx: curDx, dy: curDy }, { live: true });
         })
