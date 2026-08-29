@@ -1,7 +1,7 @@
 import { N_GROUPS } from "../../sim/ages";
 import { rebinAgeGroups } from "../../sim/age-bands";
 import { totalPop } from "../../sim/cohort";
-import { formatCompact, formatNumber, mixColor } from "../format";
+import { formatCompact, formatNumber } from "../format";
 import { t } from "../../i18n";
 import { add, layoutTriangle, scale as vscale, type SideFrame, type Vec } from "./layout";
 import type { PyramidFrame } from "../../store/types";
@@ -98,8 +98,8 @@ export function drawTriangle(
   ctx.lineTo(tri.B.x, tri.B.y);
   ctx.lineTo(tri.C.x, tri.C.y);
   ctx.closePath();
-  ctx.strokeStyle = mixColor(options.textColor, options.bgColor, 0.45);
-  ctx.lineWidth = Math.max(2, dpr);
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = Math.max(2, dpr * 1.25);
   ctx.stroke();
 
   const deathsM = frame.deathsMale || zeros(N_GROUPS);
@@ -202,7 +202,6 @@ function drawSidePyramid(
   const barDepth = depth / n;
   const gap = barDepth * 0.1;
   const ink = opts.triangleTextColor || opts.textColor;
-  const muted = mixColor(ink, opts.bgColor, 0.35);
   const ol = opts.outline !== false;
   const oc = opts.outlineColor || "#000";
   const ow = opts.outlineWidth ?? 3;
@@ -212,16 +211,17 @@ function drawSidePyramid(
     scaleMax = Math.max(1, scaleMax) * 1.08;
   }
 
-  ctx.strokeStyle = mixColor(opts.textColor, opts.bgColor, 0.55);
-  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = Math.max(1.6, window.devicePixelRatio || 1);
   ctx.beginPath();
   ctx.moveTo(side.p0.x, side.p0.y);
   ctx.lineTo(side.p1.x, side.p1.y);
   ctx.stroke();
 
   const ticks = 3;
-  ctx.font = `400 ${Math.max(9, Math.round(barDepth * 0.45))}px "JetBrains Mono", monospace`;
-  ctx.fillStyle = muted;
+  const rangeFont = Math.max(12, Math.round(barDepth * 0.64));
+  ctx.font = `500 ${Math.max(11, Math.round(barDepth * 0.58))}px "JetBrains Mono", monospace`;
+  ctx.fillStyle = ink;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const tickAngle = opts.upright
@@ -295,7 +295,7 @@ function drawSidePyramid(
   }
 
   ctx.fillStyle = ink;
-  ctx.font = `500 ${Math.max(10, Math.round(barDepth * 0.55))}px "JetBrains Mono", monospace`;
+  ctx.font = `500 ${rangeFont}px "JetBrains Mono", monospace`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   for (let g = 0; g < n; g++) {
@@ -328,7 +328,7 @@ function drawInnerCaption(
   const line = wordSize + 6;
   const below = { x: -Math.sin(angle), y: Math.cos(angle) };
   const belowIsOutward = below.x * side.outward.x + below.y * side.outward.y > 0;
-  const inwardPad = 16 + (belowIsOutward ? line + 6 : 8);
+  const inwardPad = 30 + (belowIsOutward ? line + 8 : 16);
   const p = add(side.mid, vscale(side.outward, -inwardPad));
   ctx.save();
   ctx.translate(p.x, p.y);
