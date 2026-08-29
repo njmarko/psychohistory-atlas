@@ -140,6 +140,7 @@ export type AppState = {
     useCountryLe: boolean;
     useCountryMig: boolean;
     useWppMediumRates: boolean;
+    useUnE0ByYear: boolean;
     applyTfr: boolean;
     applyLe: boolean;
     applyMig: boolean;
@@ -255,6 +256,7 @@ export const DEFAULT_STATE: AppState = {
     useCountryLe: true,
     useCountryMig: false,
     useWppMediumRates: false,
+    useUnE0ByYear: true,
     applyTfr: true,
     applyLe: true,
     applyMig: false,

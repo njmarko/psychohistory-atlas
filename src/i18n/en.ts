@@ -128,7 +128,10 @@ export const en = {
       "World run uses each country’s data TFR instead of the fertility slider, even if that slider’s Use box is on.",
     useCountryLe: "Use country life expectancy",
     useCountryLeTip:
-      "World run uses each country’s UN WPP life expectancy instead of the e0 slider, even if that slider’s Use box is on.",
+      "World run uses each country’s UN WPP life expectancy instead of the e0 slider, even if that slider’s Use box is on. Without “by year”, this is the latest value, held constant.",
+    useUnE0ByYear: "Use UN life expectancy by year",
+    useUnE0ByYearTip:
+      "For each simulation year, take e0 from UN WPP when that year exists (Estimates, then Medium). Years after the last UN point fall back to the country latest or the slider. Does not change TFR or migration.",
     useCountryMig: "Use each country’s net migration",
     useCountryMigTip: "When the migration Use box is on, take net migration from UN WPP per country instead of the slider.",
     useWppMedium: "Drive simulation with WPP Medium rates",

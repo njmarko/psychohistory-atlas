@@ -132,10 +132,17 @@ export function drawSvgLineChart(
     tip.hidden = false;
     tip.textContent = label;
     const r = host.getBoundingClientRect();
-    const x = ev.clientX - r.left + 10;
-    const y = ev.clientY - r.top - 30;
-    tip.style.left = `${Math.max(4, Math.min(r.width - 8, x))}px`;
-    tip.style.top = `${Math.max(4, y)}px`;
+    const tw = tip.offsetWidth || 160;
+    const th = tip.offsetHeight || 22;
+    let x = ev.clientX - r.left + 12;
+    let y = ev.clientY - r.top - th - 10;
+    if (x + tw > r.width - 4) x = ev.clientX - r.left - tw - 12;
+    if (x < 4) x = 4;
+    if (x + tw > r.width - 4) x = Math.max(4, r.width - tw - 4);
+    if (y < 4) y = ev.clientY - r.top + 14;
+    if (y + th > r.height - 4) y = Math.max(4, r.height - th - 4);
+    tip.style.left = `${x}px`;
+    tip.style.top = `${y}px`;
   };
 
   const addDots = (points: SeriesPoint[], color: string, prefix: string) => {

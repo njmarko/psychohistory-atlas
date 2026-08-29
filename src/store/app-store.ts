@@ -51,6 +51,7 @@ function persistUi(state: AppState) {
           useCountryLe: state.scenario.useCountryLe,
           useCountryMig: state.scenario.useCountryMig,
           useWppMediumRates: state.scenario.useWppMediumRates,
+          useUnE0ByYear: state.scenario.useUnE0ByYear,
           applyTfr: state.scenario.applyTfr,
           applyLe: state.scenario.applyLe,
           applyMig: state.scenario.applyMig,

@@ -6,7 +6,7 @@ import {
   type YearParams,
 } from "./cohort";
 import type { CountryRecord, PyramidFrame, SimParams } from "../store/types";
-import { seriesValueAt } from "../data/load";
+import { seriesValueAt, seriesValueInRange } from "../data/load";
 import { REPLACEMENT_TFR } from "../data/sources";
 
 export { REPLACEMENT_TFR };
@@ -35,6 +35,7 @@ export function paramsForCountry(
     useCountryLe: boolean;
     useCountryMig: boolean;
     useWppMediumRates?: boolean;
+    useUnE0ByYear?: boolean;
     applyTfr?: boolean;
     applyLe?: boolean;
     applyMig?: boolean;
@@ -54,11 +55,18 @@ export function paramsForCountry(
         seriesValueAt(rec.series.tfr, year) ??
         rec.latest.tfr
       : global.tfr;
-    const lifeExpectancy = !applyLe || global.useCountryLe
-      ? (useWpp && year >= wppFrom(wpp!.e0) ? seriesValueAt(wpp!.e0, year) : null) ??
-        seriesValueAt(rec.series.e0, year) ??
-        rec.latest.e0
-      : global.lifeExpectancy;
+    const unE0 =
+      global.useUnE0ByYear !== false
+        ? seriesValueInRange(rec.series.e0, year) ?? seriesValueInRange(wpp?.e0, year)
+        : null;
+    const lifeExpectancy =
+      unE0 != null
+        ? unE0
+        : !applyLe || global.useCountryLe
+          ? (useWpp && year >= wppFrom(wpp!.e0) ? seriesValueAt(wpp!.e0, year) : null) ??
+            seriesValueAt(rec.series.e0, year) ??
+            rec.latest.e0
+          : global.lifeExpectancy;
     const migration = !applyMig
       ? 0
       : global.useCountryMig
@@ -88,6 +96,7 @@ export function projectAllCountries(
     applyLe?: boolean;
     applySrb?: boolean;
     useWppMediumRates?: boolean;
+    useUnE0ByYear?: boolean;
     idealMode?: "latest" | "meanAll";
   },
   startYear: number,

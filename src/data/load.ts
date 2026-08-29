@@ -121,3 +121,17 @@ export function seriesValueAt(series: { year: number; value: number }[] | undefi
   }
   return sorted[sorted.length - 1].value;
 }
+
+/** Like seriesValueAt, but null when `year` is outside the series (no hold-forward). */
+export function seriesValueInRange(series: { year: number; value: number }[] | undefined, year: number): number | null {
+  if (!series?.length) return null;
+  let min = Infinity;
+  let max = -Infinity;
+  for (const p of series) {
+    if (!Number.isFinite(p.year)) continue;
+    if (p.year < min) min = p.year;
+    if (p.year > max) max = p.year;
+  }
+  if (!Number.isFinite(min) || year < min || year > max) return null;
+  return seriesValueAt(series, year);
+}

@@ -442,6 +442,7 @@ function bindChrome() {
     }
     rememberViewPanels({ rightOpen: !getState().layout.rightOpen });
     applyLayout(getState());
+    syncCountryDataLabel();
     renderCharts();
     requestAnimationFrame(render);
   };
@@ -887,7 +888,7 @@ function bindControls() {
     updateMap({ zoom: 1, rotation: [0, 0, 0], pan: [0, 0] });
     render();
   });
-  ["mapCountrySet", "mapMetric", "colorMode", "pivotStat", "pivotMetric", "paletteStops", "useCountryTfr", "useCountryLe", "useCountryMig", "mapShowMissing", "idealMeanAll", "hoverMini"].forEach((id) => {
+  ["mapCountrySet", "mapMetric", "colorMode", "pivotStat", "pivotMetric", "paletteStops", "useCountryTfr", "useCountryLe", "useUnE0ByYear", "useCountryMig", "mapShowMissing", "idealMeanAll", "hoverMini"].forEach((id) => {
     $(id)?.addEventListener("change", () => {
       syncMapFromDom();
       if (id === "paletteStops") {
@@ -897,7 +898,7 @@ function bindControls() {
         }
       }
       if (id === "pivotStat") $("customPivotWrap").hidden = ($("pivotStat") as HTMLSelectElement).value !== "custom";
-      if (["useCountryTfr", "useCountryLe", "useCountryMig", "mapCountrySet", "idealMeanAll", "useWppMediumRates"].includes(id)) recompute();
+      if (["useCountryTfr", "useCountryLe", "useUnE0ByYear", "useCountryMig", "mapCountrySet", "idealMeanAll", "useWppMediumRates"].includes(id)) recompute();
       else render();
     });
   });
@@ -1071,6 +1072,7 @@ function hydrateDomFromState() {
   setInput("useWppMediumRates", s.scenario.useWppMediumRates);
   setInput("useCountryTfr", s.scenario.useCountryTfr);
   setInput("useCountryLe", s.scenario.useCountryLe);
+  setInput("useUnE0ByYear", s.scenario.useUnE0ByYear);
   setInput("useCountryMig", s.scenario.useCountryMig);
   setInput("applyTfr", s.scenario.applyTfr);
   setInput("applyLe", s.scenario.applyLe);
@@ -1281,6 +1283,7 @@ function syncMapFromDom() {
   updateScenario({
     useCountryTfr: ($("useCountryTfr") as HTMLInputElement).checked,
     useCountryLe: ($("useCountryLe") as HTMLInputElement).checked,
+    useUnE0ByYear: ($("useUnE0ByYear") as HTMLInputElement)?.checked !== false,
     useCountryMig: ($("useCountryMig") as HTMLInputElement).checked,
     useWppMediumRates: ($("useWppMediumRates") as HTMLInputElement)?.checked || false,
   });
@@ -1330,6 +1333,12 @@ function syncCountryCombos(name: string) {
   for (const search of countrySearches) search.setValue(name);
 }
 
+function syncCountryDataLabel(name = getState().country) {
+  const c = countries[name];
+  const sub = $("rightSubtitle");
+  if (sub) sub.textContent = c ? displayName(c) : t("charts.empty");
+}
+
 let pendingFlyName: string | null = null;
 
 function focusCountryOnMap(name: string) {
@@ -1364,6 +1373,7 @@ function loadCountry(name: string, opts?: { keepYears?: boolean; fly?: boolean }
   if (!c) return;
   setState({ country: name });
   syncCountryCombos(name);
+  syncCountryDataLabel(name);
   const tfr = c.latest.tfr;
   ($("tfrRange") as HTMLInputElement).value = String(tfr);
   ($("tfrInput") as HTMLInputElement).value = String(tfr);
@@ -1386,7 +1396,7 @@ function loadCountry(name: string, opts?: { keepYears?: boolean; fly?: boolean }
     sexRatioBirth: c.latest.srb || 1.05,
   });
   renderSourceCard(c);
-  $("rightSubtitle").textContent = displayName(c);
+  syncCountryDataLabel(name);
   frameIndex = 0;
   flagImage = null;
   flagColorsFor = null;
@@ -1445,6 +1455,7 @@ function simParams() {
     sexRatioBirth: Number(($("srbInput") as HTMLInputElement).value),
     useCountryTfr: ($("useCountryTfr") as HTMLInputElement).checked,
     useCountryLe: ($("useCountryLe") as HTMLInputElement).checked,
+    useUnE0ByYear: ($("useUnE0ByYear") as HTMLInputElement)?.checked !== false,
     useCountryMig: ($("useCountryMig") as HTMLInputElement).checked,
     useWppMediumRates: ($("useWppMediumRates") as HTMLInputElement)?.checked || getState().scenario.useWppMediumRates,
     applyTfr: ($("applyTfr") as HTMLInputElement)?.checked !== false,
@@ -1864,6 +1875,8 @@ async function renderMap() {
         else pins.add(name);
         updateMap({ pins: [...pins] });
         setState({ country: name });
+        syncCountryCombos(name);
+        syncCountryDataLabel(name);
         if (getState().map.hoverMini && (isMobile() || isCoarsePointer()) && getState().view !== "triangle") {
           $("mapHoverStack").hidden = false;
           $("mapHoverStack").classList.add("has-pyramid");
@@ -1994,7 +2007,7 @@ function adoptHubCountry(name: string) {
   deathScale = peaks.death;
   birthScale = peaks.birth;
   syncCountryCombos(name);
-  $("rightSubtitle").textContent = displayName(c);
+  syncCountryDataLabel(name);
   syncSlidersFromCountry(c);
   renderSourceCard(c);
   flagImage = null;
@@ -2194,11 +2207,7 @@ function applyAppI18n() {
   syncNavSheet();
   const c = countries[getState().country];
   if (c) renderSourceCard(c);
-  const sub = $("rightSubtitle");
-  if (sub && (!sub.textContent || sub.textContent === "Select a country" || getState().country)) {
-    if (c) sub.textContent = displayName(c);
-    else sub.textContent = t("charts.empty");
-  }
+  syncCountryDataLabel();
   lastChartSig = "";
   if (getState().view === "database") renderDatabase();
   render();
