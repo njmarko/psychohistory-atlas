@@ -365,7 +365,7 @@ export const DEFAULT_STATE: AppState = {
     customWidth: 1920,
     customHeight: 1080,
     aspect: "16:9",
-    fps: 30,
+    fps: 60,
     format: "mp4",
     fitToLength: false,
     durationSec: 12,

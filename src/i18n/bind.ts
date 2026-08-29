@@ -48,7 +48,7 @@ export const I18N_TEXT: [string, string, string][] = [
   ["#chartText", "charts.text", "compact"],
   ["#chartShowWpp", "charts.showWpp", "check"],
   ["#chartWppColor", "charts.wppLine", "compact"],
-  ["#captureScreens", "export.screens", "label"],
+  ["#exportViewHint", "export.screensTip", "self"],
   ["#exportLayout", "export.layout", "label"],
   ["#exportRes", "export.res", "label"],
   ["#exportAspect", "export.aspect", "label"],
@@ -122,7 +122,6 @@ export const I18N_TIP: [string, string][] = [
   ["#chartText", "charts.textTip"],
   ["#chartShowWpp", "charts.showWppTip"],
   ["#chartWppColor", "charts.wppLineTip"],
-  ["#captureScreens", "export.screensTip"],
   ["#exportLayout", "export.layoutTip"],
   ["#exportRes", "export.resTip"],
   ["#exportAspect", "export.aspectTip"],
@@ -169,7 +168,7 @@ export const I18N_PLACEHOLDER: [string, string][] = [
 ];
 
 export const I18N_OPTIONS: [string, Record<string, string>][] = [
-  ["#exportLayout", { single: "export.single", splitH: "export.splitH", splitV: "export.splitV", mapGraphs: "export.mapGraphs", pyramidGraphs: "export.pyramidGraphs" }],
+  ["#exportLayout", { single: "export.single", mapGraphs: "export.mapGraphs" }],
   ["#exportRes", { custom: "export.custom" }],
   ["#videoFormat", { mp4: "export.mp4", webm: "export.webm" }],
 ];

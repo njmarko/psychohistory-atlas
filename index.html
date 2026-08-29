@@ -332,18 +332,12 @@
 
       <section class="panel">
         <h2 data-i18n="panels.export">Export video</h2>
-        <label class="field" data-tip="Which layers are painted into the video. Graphs are included when the right panel is open.">
-          <span>Screens to capture</span>
-          <div id="captureScreens" class="tag-fields"></div>
-        </label>
-        <label class="field" data-tip="How chosen screens are arranged in the frame.">
-          <span>Layout</span>
+        <p class="hint" id="exportViewHint" data-i18n="export.screensTip">Records the view on screen: map behind the triangle, heatmap, and pinned tags.</p>
+        <label class="field" data-i18n-tip="export.layoutTip">
+          <span data-i18n="export.layout">Layout</span>
           <select id="exportLayout">
-            <option value="single">Single view</option>
-            <option value="splitH">Horizontal split</option>
-            <option value="splitV">Vertical split</option>
-            <option value="mapGraphs">Map + graphs</option>
-            <option value="pyramidGraphs">Pyramid + graphs</option>
+            <option value="single">Current view</option>
+            <option value="mapGraphs">Current view + graphs</option>
           </select>
         </label>
         <label class="field" data-tip="Output pixel height. Width follows the aspect ratio.">
@@ -379,7 +373,7 @@
         </label>
         <label class="field" data-tip="Encoding frame rate. Playback speed of years is still Speed above.">
           <span>FPS</span>
-          <input type="number" id="exportFps" value="30" min="10" max="60" />
+          <input type="number" id="exportFps" value="60" min="10" max="60" />
         </label>
         <button id="btnExport" class="btn primary full" type="button" data-tip="Record one pass from the start year to the end year as a video file.">🎬 Export timelapse</button>
         <button id="btnSnapshot" class="btn full" type="button" data-tip="Download a PNG of the pyramid (Pyramid view) or the triangle overlay (Triangle view). Does not capture the world map.">📷 Snapshot PNG</button>

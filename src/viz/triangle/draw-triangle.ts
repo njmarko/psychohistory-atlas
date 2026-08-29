@@ -90,7 +90,7 @@ export function drawTriangle(
     outlineWidth
   );
 
-  const size = Math.min(W, H) * 0.42;
+  const size = Math.min(W, H) * 0.46;
   const tri = layoutTriangle(W / 2, H * 0.5, size);
 
   ctx.beginPath();
@@ -323,9 +323,9 @@ function drawInnerCaption(
   canvasH: number
 ) {
   const angle = readableAngle(Math.atan2(side.tangent.y, side.tangent.x));
-  const wordSize = Math.max(18, Math.round(canvasH * 0.032));
-  const numSize = Math.max(16, Math.round(canvasH * 0.028));
-  const line = wordSize + 6;
+  const wordSize = Math.max(14, Math.round(canvasH * 0.026));
+  const numSize = Math.max(13, Math.round(canvasH * 0.022));
+  const line = wordSize + 4;
   const below = { x: -Math.sin(angle), y: Math.cos(angle) };
   const belowIsOutward = below.x * side.outward.x + below.y * side.outward.y > 0;
   const inwardPad = 30 + (belowIsOutward ? line + 8 : 16);

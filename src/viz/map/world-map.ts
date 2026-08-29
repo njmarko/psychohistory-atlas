@@ -514,6 +514,13 @@ export function recolorLiveMap(options: MapRenderOpts) {
     }
     return coloring.fillFor(name ? options.snapshot.countries[name] : null);
   };
+  const bg = options.state.appearance.bgColor;
+  const svg = live.scene.node()?.ownerSVGElement as SVGSVGElement | null;
+  if (svg) {
+    svg.style.background = bg;
+    d3.select(svg).select("rect").attr("fill", bg);
+  }
+  live.scene.selectAll("path.ocean-feat").attr("fill", oceanFill(options.state, bg));
   live.scene.selectAll("path.country-feat").attr("fill", (d: any) => live!.fillFeature(d));
   paintHtmlLegend({
     metricId: coloring.metricId,
@@ -875,6 +882,32 @@ function formatLegend(v: number, unit?: string) {
   return unit ? `${s}` : s;
 }
 
+/** Largest geographic ring so overseas fragments (French Guiana, Alaska, …) don't pull the pin. */
+function mainlandFeature(f: any) {
+  const geom = f?.geometry;
+  if (!geom || geom.type !== "MultiPolygon" || !Array.isArray(geom.coordinates)) return f;
+  let bestPoly = geom.coordinates[0];
+  let bestArea = -1;
+  for (const poly of geom.coordinates) {
+    const ring = poly[0] || [];
+    let a = 0;
+    for (let i = 0, n = ring.length - 1; i < n; i++) {
+      a += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+    }
+    const area = Math.abs(a);
+    if (area > bestArea) {
+      bestArea = area;
+      bestPoly = poly;
+    }
+  }
+  return {
+    type: "Feature",
+    id: f.id,
+    properties: f.properties,
+    geometry: { type: "Polygon", coordinates: bestPoly },
+  };
+}
+
 function drawPins(
   g: any,
   {
@@ -926,7 +959,15 @@ function drawPins(
           best = f;
         }
       }
-      if (best) centroid = path.centroid(best);
+      if (best) {
+        const main = mainlandFeature(best);
+        const ll = d3.geoCentroid(main as any) as [number, number];
+        const proj = path.projection?.();
+        const xy = proj && ll && Number.isFinite(ll[0]) ? proj(ll) : path.centroid(main);
+        if (xy && Number.isFinite(xy[0]) && Number.isFinite(xy[1])) {
+          centroid = xy as [number, number];
+        }
+      }
     }
     if (!rec || !centroid || !Number.isFinite(centroid[0])) continue;
 

@@ -331,15 +331,17 @@ export function drawPyramid(
     const box = Math.round(titleSize ? subSize * 0.7 : H * 0.016);
     ctx.font = `500 ${titleSize ? subSize : Math.round(H * 0.016)}px "DM Sans", system-ui, sans-serif`;
     ctx.textBaseline = "middle";
+    const maleBoxX = W / 2 - Math.round(W * 0.24);
+    const femaleBoxX = W / 2 + Math.round(W * 0.1);
     ctx.fillStyle = maleColor;
-    ctx.fillRect(W / 2 - Math.round(W * 0.12), ly - box / 2, box, box);
+    ctx.fillRect(maleBoxX, ly - box / 2, box, box);
     ctx.fillStyle = textColor;
     ctx.textAlign = "left";
-    ctx.fillText(`${t("canvas.male")} (${formatNumber(maleTotal)})`, W / 2 - Math.round(W * 0.12) + box + 8, ly);
+    ctx.fillText(`${t("canvas.male")} (${formatNumber(maleTotal)})`, maleBoxX + box + 8, ly);
     ctx.fillStyle = femaleColor;
-    ctx.fillRect(W / 2 + Math.round(W * 0.02), ly - box / 2, box, box);
+    ctx.fillRect(femaleBoxX, ly - box / 2, box, box);
     ctx.fillStyle = textColor;
-    ctx.fillText(`${t("canvas.female")} (${formatNumber(femaleTotal)})`, W / 2 + Math.round(W * 0.02) + box + 8, ly);
+    ctx.fillText(`${t("canvas.female")} (${formatNumber(femaleTotal)})`, femaleBoxX + box + 8, ly);
   }
 
   ctx.fillStyle = muted;
@@ -348,8 +350,8 @@ export function drawPyramid(
   ctx.textAlign = "center";
   const maleAxis = showLegend ? `← ${t("canvas.male")}` : `← ${t("canvas.male")}  ${formatNumber(maleTotal)}`;
   const femaleAxis = showLegend ? `${t("canvas.female")} →` : `${t("canvas.female")}  ${formatNumber(femaleTotal)} →`;
-  ctx.fillText(maleAxis, padL + halfW * 0.5, padT - Math.round(Math.max(axisFont * 0.35, H * 0.012)));
-  ctx.fillText(femaleAxis, padL + halfW + centerGap + halfW * 0.5, padT - Math.round(Math.max(axisFont * 0.35, H * 0.012)));
+  ctx.fillText(maleAxis, padL + halfW * 0.28, padT - Math.round(Math.max(axisFont * 0.35, H * 0.012)));
+  ctx.fillText(femaleAxis, padL + halfW + centerGap + halfW * 0.72, padT - Math.round(Math.max(axisFont * 0.35, H * 0.012)));
 }
 
 function fillOutlined(

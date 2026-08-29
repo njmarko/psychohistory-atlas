@@ -35,7 +35,7 @@ import {
   updateScenario,
   updateTime,
 } from "./store/app-store";
-import type { AppState, CaptureScreen, CountryRecord, PyramidFrame, TagField, ViewMode } from "./store/types";
+import type { AppState, CountryRecord, PyramidFrame, TagField, ViewMode } from "./store/types";
 import { ageShare, maxBar, medianAge, projectSeries, totalPop } from "./sim/cohort";
 import { clampBands, rebinAgeGroups } from "./sim/age-bands";
 import { aggregateRegions, formatPop, paramsForCountry, projectAllCountries, snapshotFromSeries, snapshotYear, type CountryRun } from "./sim/world";
@@ -124,7 +124,6 @@ export async function boot() {
   $("helpBody").innerHTML = getHelpHtml(getLocale());
   fillMetricSelects();
   fillTagFields();
-  fillCaptureScreens();
   bindChrome();
   bindControls();
   fillChartSeries();
@@ -244,29 +243,6 @@ function fillTagFields() {
       const tagFields = [...host.querySelectorAll("input:checked")].map((el) => (el as HTMLInputElement).dataset.tag as TagField);
       updateMap({ tagFields: tagFields.length ? tagFields : ["name"] });
       render();
-    });
-  });
-}
-
-function fillCaptureScreens() {
-  const screens: { id: CaptureScreen; label: string }[] = [
-    { id: "pyramid", label: t("export.pyramid") },
-    { id: "triangle", label: t("export.triangle") },
-    { id: "map", label: t("export.map") },
-    { id: "graphs", label: t("export.graphs") },
-    { id: "stats", label: t("export.stats") },
-    { id: "yearStrip", label: t("export.yearStrip") },
-    { id: "pins", label: t("export.pins") },
-  ];
-  const host = $("captureScreens");
-  const selected = new Set(getState().exportOpts.screens);
-  host.innerHTML = screens
-    .map((s) => `<label><input type="checkbox" data-cap="${s.id}" ${selected.has(s.id) ? "checked" : ""}/> ${s.label}</label>`)
-    .join("");
-  host.querySelectorAll("input").forEach((inp) => {
-    inp.addEventListener("change", () => {
-      const list = [...host.querySelectorAll("input:checked")].map((el) => (el as HTMLInputElement).dataset.cap as CaptureScreen);
-      updateExport({ screens: list.length ? list : ["pyramid"] });
     });
   });
 }
@@ -1328,7 +1304,7 @@ function syncExportFromDom() {
     resolution: ($("exportRes") as HTMLSelectElement).value as any,
     aspect: ($("exportAspect") as HTMLSelectElement).value as any,
     format: ($("videoFormat") as HTMLSelectElement).value as any,
-    fps: Number(($("exportFps") as HTMLInputElement).value) || 30,
+    fps: Number(($("exportFps") as HTMLInputElement).value) || 60,
     customWidth: Number(($("customW") as HTMLInputElement).value) || 1920,
     customHeight: Number(($("customH") as HTMLInputElement).value) || 1080,
   });
@@ -1806,7 +1782,7 @@ async function renderMap() {
   }
   $("mapSubtitle").textContent = t("map.subtitle", { year, pop: formatPop(pop) });
 
-  if (mapRenderPending) return;
+  while (mapRenderPending) await new Promise((r) => setTimeout(r, 16));
   mapRenderPending = true;
   try {
     const wrap = $("worldMapSvg").parentElement!;
@@ -2204,7 +2180,6 @@ function applyAppI18n() {
   ($("mapMetric") as HTMLSelectElement).value = metricVal;
   if (pivotVal != null) ($("pivotMetric") as HTMLSelectElement).value = pivotVal;
   fillTagFields();
-  fillCaptureScreens();
   fillChartSeries();
   countrySearches.forEach((api) => {
     const v = api.getValue();
@@ -2474,11 +2449,12 @@ async function runExport() {
   canvas.height = height;
   const view: string = s.view;
   const count =
-    view === "map" || view === "regions"
+    view === "map" || view === "regions" || view === "triangle"
       ? worldByCountry
         ? Object.values(worldByCountry)[0].series.length
-        : 0
+        : frames.length
       : frames.length;
+  const withGraphs = s.exportOpts.layout === "mapGraphs" || s.exportOpts.layout === "pyramidGraphs";
   try {
     const { blob, ext } = await exportPaintedVideo({
       canvas,
@@ -2491,33 +2467,46 @@ async function runExport() {
         status.textContent = t("export.recording", { year, percent: percent.toFixed(0) });
       },
       renderFrame: async (i, c) => {
-        frameIndex = i;
+        const year = s.time.startYear + i;
+        updateTime({ currentYear: year });
+        frameIndex = Math.max(0, year - simStartYear());
         const ctx = c.getContext("2d")!;
         ctx.fillStyle = s.appearance.bgColor;
         ctx.fillRect(0, 0, c.width, c.height);
-        const screens = s.exportOpts.screens;
-        const wantGraphs = screens.includes("graphs") && s.layout.rightOpen;
-        const mainH = screens.includes("stats") ? height - 80 : height;
-        if (view === "triangle" || screens.includes("triangle") && view === "triangle") {
-          const tmp = scratch(width, mainH);
-          if (frames[i]) drawTriangle(tmp, frames[i], { ...pyramidOpts(frames[i]), popScale: scaleMax, deathScale, birthScale, countryName: displayName(countries[s.country]) });
-          ctx.drawImage(tmp, 0, 0, width, wantGraphs ? mainH * 0.65 : mainH);
-        } else if (view === "map" || view === "regions" || screens.includes("map")) {
+        const graphH = withGraphs ? Math.round(height * 0.32) : 0;
+        const mainH = height - graphH;
+        const mapish = view === "triangle" || view === "map" || view === "regions";
+        if (mapish) {
           await renderMap();
-          const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, width, wantGraphs ? mainH * 0.65 : mainH);
-          ctx.drawImage(img, 0, 0);
-        } else if (frames[i]) {
-          const tmp = scratch(width, wantGraphs ? Math.round(mainH * 0.65) : mainH);
-          drawPyramid(tmp, frames[i], pyramidOpts(frames[i]));
-          ctx.drawImage(tmp, 0, 0);
+          const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, width, mainH);
+          ctx.drawImage(img, 0, 0, width, mainH);
+          if (view === "triangle") {
+            const frame = simFrameFor(year);
+            if (frame) {
+              const series = frames.length ? frames : worldByCountry?.[s.country]?.series || [frame];
+              const peaks = trianglePeakScales(series, 0, series.length - 1);
+              const tmp = scratch(width, mainH);
+              drawTriangle(tmp, frame, {
+                ...pyramidOpts(frame),
+                popScale: peaks.pop,
+                deathScale: peaks.death,
+                birthScale: peaks.birth,
+                countryName: displayName(countries[s.country]),
+                overlay: true,
+              });
+              ctx.drawImage(tmp, 0, 0, width, mainH);
+            }
+          }
+        } else {
+          const frame = frames[i] || simFrameFor(year);
+          if (frame) {
+            const tmp = scratch(width, mainH);
+            drawPyramid(tmp, frame, pyramidOpts(frame));
+            ctx.drawImage(tmp, 0, 0);
+          }
         }
-        if (wantGraphs) {
-          paintGraphs(ctx, 0, Math.round(mainH * 0.65), width, Math.round(mainH * 0.35));
-        }
-        if (screens.includes("stats")) {
-          const frame = frames[i];
-          const total = frame ? totalPop(frame.male, frame.female) : 0;
-          paintStats(ctx, 0, height - 80, width, 80, frame, total);
+        if (withGraphs) {
+          paintGraphs(ctx, 0, mainH, width, graphH);
         }
       },
     });
@@ -2557,21 +2546,12 @@ function paintGraphs(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.drawImage(tmp, x, y, w, h);
 }
 
-function paintStats(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, frame: PyramidFrame | undefined, total: number) {
-  ctx.fillStyle = "#0b1220";
-  ctx.fillRect(x, y, w, h);
-  ctx.fillStyle = "#e2e8f0";
-  ctx.font = "600 16px DM Sans, sans-serif";
-  ctx.textAlign = "center";
-  if (!frame) return;
-  const m = frame.male.reduce((a, b) => a + b, 0);
-  const f = frame.female.reduce((a, b) => a + b, 0);
-  const line = `${t("stats.year")} ${frame.year}   ${t("stats.total")} ${formatNumber(total)}   ${t("stats.male")} ${formatNumber(m)}   ${t("stats.female")} ${formatNumber(f)}   ${t("stats.median")} ${medianAge(frame.male, frame.female).toFixed(1)}   ${t("stats.tfr")} ${getState().scenario.tfr.toFixed(2)}`;
-  ctx.fillText(line, x + w / 2, y + h / 2 + 6);
-}
-
 async function svgToImage(svg: SVGSVGElement, w: number, h: number) {
-  const xml = new XMLSerializer().serializeToString(svg);
+  const clone = svg.cloneNode(true) as SVGSVGElement;
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.setAttribute("width", String(w));
+  clone.setAttribute("height", String(h));
+  const xml = new XMLSerializer().serializeToString(clone);
   const blob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const img = new Image();
