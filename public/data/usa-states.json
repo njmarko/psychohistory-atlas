@@ -1,0 +1,483 @@
+{
+  "source": {
+    "id": "birthgauge2025us",
+    "label": "BirthGauge US states TFR / TMR / CPM 2025",
+    "year": 2025,
+    "url": "https://x.com/BirthGauge",
+    "note": "TFR = TMR \u00d7 CPM. Total Maternal Rate is first-birth TFR (share of women becoming mothers). Children per Mother is TFR / TMR."
+  },
+  "populationSource": {
+    "id": "census2025",
+    "label": "U.S. Census Bureau Vintage 2025 state population estimates (July 1, 2025)",
+    "year": 2025,
+    "url": "https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html"
+  },
+  "national": {
+    "name": "United States",
+    "tfr": 1.57,
+    "tmr": 0.625,
+    "cpm": 2.52,
+    "population": 341784857
+  },
+  "states": {
+    "Alabama": {
+      "fips": "01",
+      "abbr": "AL",
+      "iso2": "us-al",
+      "tfr": 1.67,
+      "tmr": 0.635,
+      "cpm": 2.62,
+      "population": 5193088
+    },
+    "Alaska": {
+      "fips": "02",
+      "abbr": "AK",
+      "iso2": "us-ak",
+      "tfr": 1.81,
+      "tmr": 0.67,
+      "cpm": 2.71,
+      "population": 737270
+    },
+    "Arizona": {
+      "fips": "04",
+      "abbr": "AZ",
+      "iso2": "us-az",
+      "tfr": 1.57,
+      "tmr": 0.607,
+      "cpm": 2.58,
+      "population": 7623818
+    },
+    "Arkansas": {
+      "fips": "05",
+      "abbr": "AR",
+      "iso2": "us-ar",
+      "tfr": 1.76,
+      "tmr": 0.677,
+      "cpm": 2.6,
+      "population": 3114791
+    },
+    "California": {
+      "fips": "06",
+      "abbr": "CA",
+      "iso2": "us-ca",
+      "tfr": 1.42,
+      "tmr": 0.59,
+      "cpm": 2.41,
+      "population": 39355309
+    },
+    "Colorado": {
+      "fips": "08",
+      "abbr": "CO",
+      "iso2": "us-co",
+      "tfr": 1.49,
+      "tmr": 0.644,
+      "cpm": 2.31,
+      "population": 6012561
+    },
+    "Connecticut": {
+      "fips": "09",
+      "abbr": "CT",
+      "iso2": "us-ct",
+      "tfr": 1.46,
+      "tmr": 0.6,
+      "cpm": 2.43,
+      "population": 3688496
+    },
+    "Delaware": {
+      "fips": "10",
+      "abbr": "DE",
+      "iso2": "us-de",
+      "tfr": 1.56,
+      "tmr": 0.601,
+      "cpm": 2.59,
+      "population": 1059952
+    },
+    "District of Columbia": {
+      "fips": "11",
+      "abbr": "DC",
+      "iso2": "us-dc",
+      "tfr": 1.04,
+      "tmr": 0.489,
+      "cpm": 2.12,
+      "population": 693645
+    },
+    "Florida": {
+      "fips": "12",
+      "abbr": "FL",
+      "iso2": "us-fl",
+      "tfr": 1.55,
+      "tmr": 0.671,
+      "cpm": 2.3,
+      "population": 23462518
+    },
+    "Georgia": {
+      "fips": "13",
+      "abbr": "GA",
+      "iso2": "us-ga",
+      "tfr": 1.58,
+      "tmr": 0.676,
+      "cpm": 2.34,
+      "population": 11302748
+    },
+    "Hawaii": {
+      "fips": "15",
+      "abbr": "HI",
+      "iso2": "us-hi",
+      "tfr": 1.63,
+      "tmr": 0.68,
+      "cpm": 2.4,
+      "population": 1432820
+    },
+    "Idaho": {
+      "fips": "16",
+      "abbr": "ID",
+      "iso2": "us-id",
+      "tfr": 1.85,
+      "tmr": 0.676,
+      "cpm": 2.73,
+      "population": 2029733
+    },
+    "Illinois": {
+      "fips": "17",
+      "abbr": "IL",
+      "iso2": "us-il",
+      "tfr": 1.45,
+      "tmr": 0.577,
+      "cpm": 2.52,
+      "population": 12719141
+    },
+    "Indiana": {
+      "fips": "18",
+      "abbr": "IN",
+      "iso2": "us-in",
+      "tfr": 1.77,
+      "tmr": 0.638,
+      "cpm": 2.77,
+      "population": 6973333
+    },
+    "Iowa": {
+      "fips": "19",
+      "abbr": "IA",
+      "iso2": "us-ia",
+      "tfr": 1.84,
+      "tmr": 0.648,
+      "cpm": 2.84,
+      "population": 3238387
+    },
+    "Kansas": {
+      "fips": "20",
+      "abbr": "KS",
+      "iso2": "us-ks",
+      "tfr": 1.83,
+      "tmr": 0.653,
+      "cpm": 2.79,
+      "population": 2977220
+    },
+    "Kentucky": {
+      "fips": "21",
+      "abbr": "KY",
+      "iso2": "us-ky",
+      "tfr": 1.79,
+      "tmr": 0.68,
+      "cpm": 2.63,
+      "population": 4606864
+    },
+    "Louisiana": {
+      "fips": "22",
+      "abbr": "LA",
+      "iso2": "us-la",
+      "tfr": 1.7,
+      "tmr": 0.624,
+      "cpm": 2.73,
+      "population": 4618189
+    },
+    "Maine": {
+      "fips": "23",
+      "abbr": "ME",
+      "iso2": "us-me",
+      "tfr": 1.44,
+      "tmr": 0.606,
+      "cpm": 2.37,
+      "population": 1414874
+    },
+    "Maryland": {
+      "fips": "24",
+      "abbr": "MD",
+      "iso2": "us-md",
+      "tfr": 1.51,
+      "tmr": 0.593,
+      "cpm": 2.55,
+      "population": 6265347
+    },
+    "Massachusetts": {
+      "fips": "25",
+      "abbr": "MA",
+      "iso2": "us-ma",
+      "tfr": 1.34,
+      "tmr": 0.565,
+      "cpm": 2.38,
+      "population": 7154084
+    },
+    "Michigan": {
+      "fips": "26",
+      "abbr": "MI",
+      "iso2": "us-mi",
+      "tfr": 1.54,
+      "tmr": 0.586,
+      "cpm": 2.63,
+      "population": 10127884
+    },
+    "Minnesota": {
+      "fips": "27",
+      "abbr": "MN",
+      "iso2": "us-mn",
+      "tfr": 1.86,
+      "tmr": 0.604,
+      "cpm": 2.75,
+      "population": 5830405
+    },
+    "Mississippi": {
+      "fips": "28",
+      "abbr": "MS",
+      "iso2": "us-ms",
+      "tfr": 1.73,
+      "tmr": 0.643,
+      "cpm": 2.69,
+      "population": 2954160
+    },
+    "Missouri": {
+      "fips": "29",
+      "abbr": "MO",
+      "iso2": "us-mo",
+      "tfr": 1.7,
+      "tmr": 0.634,
+      "cpm": 2.68,
+      "population": 6270541
+    },
+    "Montana": {
+      "fips": "30",
+      "abbr": "MT",
+      "iso2": "us-mt",
+      "tfr": 1.64,
+      "tmr": 0.669,
+      "cpm": 2.46,
+      "population": 1144694
+    },
+    "Nebraska": {
+      "fips": "31",
+      "abbr": "NE",
+      "iso2": "us-ne",
+      "tfr": 1.89,
+      "tmr": 0.67,
+      "cpm": 2.83,
+      "population": 2018006
+    },
+    "Nevada": {
+      "fips": "32",
+      "abbr": "NV",
+      "iso2": "us-nv",
+      "tfr": 1.45,
+      "tmr": 0.536,
+      "cpm": 2.71,
+      "population": 3282188
+    },
+    "New Hampshire": {
+      "fips": "33",
+      "abbr": "NH",
+      "iso2": "us-nh",
+      "tfr": 1.4,
+      "tmr": 0.582,
+      "cpm": 2.41,
+      "population": 1415342
+    },
+    "New Jersey": {
+      "fips": "34",
+      "abbr": "NJ",
+      "iso2": "us-nj",
+      "tfr": 1.57,
+      "tmr": 0.63,
+      "cpm": 2.49,
+      "population": 9548215
+    },
+    "New Mexico": {
+      "fips": "35",
+      "abbr": "NM",
+      "iso2": "us-nm",
+      "tfr": 1.55,
+      "tmr": 0.601,
+      "cpm": 2.59,
+      "population": 2125498
+    },
+    "New York": {
+      "fips": "36",
+      "abbr": "NY",
+      "iso2": "us-ny",
+      "tfr": 1.43,
+      "tmr": 0.573,
+      "cpm": 2.49,
+      "population": 20002427
+    },
+    "North Carolina": {
+      "fips": "37",
+      "abbr": "NC",
+      "iso2": "us-nc",
+      "tfr": 1.64,
+      "tmr": 0.651,
+      "cpm": 2.52,
+      "population": 11197968
+    },
+    "North Dakota": {
+      "fips": "38",
+      "abbr": "ND",
+      "iso2": "us-nd",
+      "tfr": 1.91,
+      "tmr": 0.652,
+      "cpm": 2.93,
+      "population": 799358
+    },
+    "Ohio": {
+      "fips": "39",
+      "abbr": "OH",
+      "iso2": "us-oh",
+      "tfr": 1.65,
+      "tmr": 0.61,
+      "cpm": 2.71,
+      "population": 11900510
+    },
+    "Oklahoma": {
+      "fips": "40",
+      "abbr": "OK",
+      "iso2": "us-ok",
+      "tfr": 1.78,
+      "tmr": 0.654,
+      "cpm": 2.73,
+      "population": 4123288
+    },
+    "Oregon": {
+      "fips": "41",
+      "abbr": "OR",
+      "iso2": "us-or",
+      "tfr": 1.37,
+      "tmr": 0.557,
+      "cpm": 2.45,
+      "population": 4273586
+    },
+    "Pennsylvania": {
+      "fips": "42",
+      "abbr": "PA",
+      "iso2": "us-pa",
+      "tfr": 1.52,
+      "tmr": 0.586,
+      "cpm": 2.6,
+      "population": 13059432
+    },
+    "Rhode Island": {
+      "fips": "44",
+      "abbr": "RI",
+      "iso2": "us-ri",
+      "tfr": 1.31,
+      "tmr": 0.587,
+      "cpm": 2.24,
+      "population": 1114521
+    },
+    "South Carolina": {
+      "fips": "45",
+      "abbr": "SC",
+      "iso2": "us-sc",
+      "tfr": 1.67,
+      "tmr": 0.672,
+      "cpm": 2.49,
+      "population": 5570274
+    },
+    "South Dakota": {
+      "fips": "46",
+      "abbr": "SD",
+      "iso2": "us-sd",
+      "tfr": 2.02,
+      "tmr": 0.691,
+      "cpm": 2.92,
+      "population": 935094
+    },
+    "Tennessee": {
+      "fips": "47",
+      "abbr": "TN",
+      "iso2": "us-tn",
+      "tfr": 1.7,
+      "tmr": 0.686,
+      "cpm": 2.48,
+      "population": 7315076
+    },
+    "Texas": {
+      "fips": "48",
+      "abbr": "TX",
+      "iso2": "us-tx",
+      "tfr": 1.71,
+      "tmr": 0.673,
+      "cpm": 2.53,
+      "population": 31709821
+    },
+    "Utah": {
+      "fips": "49",
+      "abbr": "UT",
+      "iso2": "us-ut",
+      "tfr": 1.79,
+      "tmr": 0.632,
+      "cpm": 2.83,
+      "population": 3538904
+    },
+    "Vermont": {
+      "fips": "50",
+      "abbr": "VT",
+      "iso2": "us-vt",
+      "tfr": 1.33,
+      "tmr": 0.571,
+      "cpm": 2.32,
+      "population": 644663
+    },
+    "Virginia": {
+      "fips": "51",
+      "abbr": "VA",
+      "iso2": "us-va",
+      "tfr": 1.55,
+      "tmr": 0.631,
+      "cpm": 2.46,
+      "population": 8880107
+    },
+    "Washington": {
+      "fips": "53",
+      "abbr": "WA",
+      "iso2": "us-wa",
+      "tfr": 1.47,
+      "tmr": 0.601,
+      "cpm": 2.45,
+      "population": 8001020
+    },
+    "West Virginia": {
+      "fips": "54",
+      "abbr": "WV",
+      "iso2": "us-wv",
+      "tfr": 1.63,
+      "tmr": 0.633,
+      "cpm": 2.58,
+      "population": 1766147
+    },
+    "Wisconsin": {
+      "fips": "55",
+      "abbr": "WI",
+      "iso2": "us-wi",
+      "tfr": 1.62,
+      "tmr": 0.599,
+      "cpm": 2.7,
+      "population": 5972787
+    },
+    "Wyoming": {
+      "fips": "56",
+      "abbr": "WY",
+      "iso2": "us-wy",
+      "tfr": 1.74,
+      "tmr": 0.66,
+      "cpm": 2.64,
+      "population": 588753
+    }
+  }
+}

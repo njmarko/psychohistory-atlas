@@ -75,6 +75,7 @@ export const HELP_HTML_EN = `
 <p>
   Hovering a country on the world map shows a mini-pyramid at the <strong>same year</strong> as the simulation.
   Pause on the map pauses that pyramid too.
+  The <strong>USA</strong> tab is the same interaction on a flat Albers map of states (no globe): hover pyramids, pins, heatmap, year strip, and the state’s own BirthGauge TFR.
 </p>
 
 <h3>6. What this is not</h3>
@@ -96,6 +97,8 @@ export const HELP_HTML_EN = `
 <ul class="help-list">
   <li><strong>UN World Population Prospects 2024</strong> (CC BY 3.0 IGO) — GEN/01 indicators and the age–sex base. <em>population.un.org/wpp</em></li>
   <li><strong>BirthGauge / national statistical offices</strong> — 2015–2026 TFR file in the repo (recent years overlay WPP).</li>
+  <li><strong>BirthGauge US states 2025</strong> — TFR, TMR (first-birth TFR / share of women becoming mothers), and CPM (children per mother) for the 50 states and DC. The USA map uses these TFR values in the pyramid simulation.</li>
+  <li><strong>U.S. Census Bureau Vintage 2025</strong> — July 1, 2025 state population estimates. Each state’s age–sex bars start from the United States WPP pyramid, scaled by that state’s share of the US total.</li>
   <li><strong>DHS STATcompiler</strong> indicator <code>PR_IDLC_W_MNA</code> — mean ideal number of children, women 15–49.</li>
   <li><strong>Eurobarometer / OECD Family Database / GGS</strong> published means for high-income countries DHS does not cover.</li>
   <li><strong>OECD International Migration Database</strong> — optional gross <em>inflows</em> on the country graphs for a subset of countries. Not used as map net migration.</li>
@@ -188,6 +191,7 @@ export const HELP_HTML_SR = `
 <p>
   Прелазак преко земље на светској карти приказује мини-пирамиду у <strong>истој години</strong> као симулација.
   Пауза на карти паузира и ту пирамиду.
+  Језичак <strong>САД</strong> је иста интеракција на равној Алберсовој карти држава (без глобуса): пирамиде на преласку, чиоде, топлотна карта, трака година и ССФ те државе из BirthGauge.
 </p>
 
 <h3>6. Шта ово није</h3>
@@ -209,6 +213,8 @@ export const HELP_HTML_SR = `
 <ul class="help-list">
   <li><strong>УН Светски изгледи становништва 2024</strong> (CC BY 3.0 IGO) — GEN/01 показатељи и старосно-полна основа. <em>population.un.org/wpp</em></li>
   <li><strong>BirthGauge / национални заводи</strong> — датотека ССФ 2015–2026 у репозиторијуму (скорије године прекривају WPP).</li>
+  <li><strong>BirthGauge америчке државе 2025</strong> — ССФ, СМР (ССФ првог детета / удео жена које постану мајке) и ДПМ (деце по мајци) за 50 држава и DC. Карта САД користи те ССФ вредности у симулацији пирамиде.</li>
+  <li><strong>U.S. Census Bureau Vintage 2025</strong> — процене становништва држава на 1. јул 2025. Старосне траке сваке државе полазе од WPP пирамиде САД, скалиране уделом те државе у укупном становништву.</li>
   <li><strong>DHS STATcompiler</strong> показатељ <code>PR_IDLC_W_MNA</code> — средњи идеални број деце, жене 15–49.</li>
   <li><strong>Eurobarometer / OECD Family Database / GGS</strong> објављени просеци за земље високог дохотка које DHS не покрива.</li>
   <li><strong>OECD база међународних миграција</strong> — опциони бруто <em>приливи</em> на графиконима за подскуп земаља. Не користи се као нето миграција на карти.</li>

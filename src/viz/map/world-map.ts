@@ -42,13 +42,21 @@ const NAME_ALIASES: Record<string, string | null> = {
 
 let worldTopo: any = null;
 let countriesGeo: any = null;
+let usaTopo: any = null;
+let usaGeo: any = null;
 
 export async function loadMapLibs() {
-  if (countriesGeo) return { d3, countriesGeo, worldTopo };
-  const topo = (await import("world-atlas/countries-110m.json")).default as any;
-  worldTopo = topo;
-  countriesGeo = feature(topo, topo.objects.countries as any);
-  return { d3, countriesGeo, worldTopo };
+  if (!countriesGeo) {
+    const topo = (await import("world-atlas/countries-110m.json")).default as any;
+    worldTopo = topo;
+    countriesGeo = feature(topo, topo.objects.countries as any);
+  }
+  if (!usaGeo) {
+    const topo = (await import("us-atlas/states-10m.json")).default as any;
+    usaTopo = topo;
+    usaGeo = feature(topo, topo.objects.states as any);
+  }
+  return { d3, countriesGeo, worldTopo, usaGeo, usaTopo };
 }
 
 function buildIndexes(snapshotCountries: Record<string, any>) {
@@ -58,8 +66,10 @@ function buildIndexes(snapshotCountries: Record<string, any>) {
   const nameIndex: Record<string, string> = {};
   for (const [name, rec] of Object.entries(snapshotCountries)) {
     nameIndex[name] = name;
+    if (rec.name && !nameIndex[rec.name]) nameIndex[rec.name] = name;
     if (rec.iso3) iso3Index[rec.iso3] = name;
-    if (rec.iso2) iso2Index[rec.iso2] = name;
+    if (rec.iso2) iso2Index[String(rec.iso2).toLowerCase()] = name;
+    if (rec.iso2) iso2Index[String(rec.iso2).toUpperCase()] = name;
     if (rec.isoNum != null) isoNumIndex[Number(rec.isoNum)] = name;
   }
   iso3Index.XKX = "Serbia";
@@ -70,11 +80,20 @@ function buildIndexes(snapshotCountries: Record<string, any>) {
 }
 
 function resolveDataName(props: any, indexes: ReturnType<typeof buildIndexes>, id?: unknown) {
+  const rawName = props?.name || props?.NAME || props?.NAME_EN || props?.ADMIN || "";
+  const atlas = drawingAtlas || live?.atlas || "world";
+  if (atlas === "usa") {
+    if (rawName && indexes.nameIndex[rawName]) return indexes.nameIndex[rawName];
+    if (id != null) {
+      const n = Number(id);
+      if (indexes.isoNumIndex[n]) return indexes.isoNumIndex[n];
+    }
+    return null;
+  }
   const a3 = props?.ISO_A3 || props?.iso_a3;
   const a2 = props?.ISO_A2 || props?.iso_a2;
   if (a3 && indexes.iso3Index[a3]) return indexes.iso3Index[a3];
   if (a2 && a2 !== "-99" && indexes.iso2Index[a2]) return indexes.iso2Index[a2];
-  const rawName = props?.name || props?.NAME || props?.NAME_EN || props?.ADMIN || "";
   const aliased = NAME_ALIASES[rawName];
   if (aliased === null) return null;
   if (aliased && indexes.nameIndex[aliased]) return aliased;
@@ -95,6 +114,7 @@ function isSerbiaKosovoPair(a: any, b: any, indexes: ReturnType<typeof buildInde
 
 export type MapRenderOpts = {
   mode: "countries" | "regions";
+  atlas?: "world" | "usa";
   snapshot: { countries: Record<string, any>; worldPop: number };
   regionSnapshot?: { regions: Record<string, any>; worldPop: number };
   state: AppState;
@@ -133,10 +153,13 @@ type LiveMap = {
   regionByCountryName: Record<string, string>;
   fillFeature: (d: any) => string;
   pinKey: string;
+  atlas: "world" | "usa";
+  topo: any;
 };
 
 let live: LiveMap | null = null;
 let flyGen = 0;
+let drawingAtlas: "world" | "usa" = "world";
 
 export function cancelMapFly() {
   flyGen++;
@@ -242,10 +265,10 @@ function nameMatches(resolved: string | null, target: string | null, mode: "coun
 }
 
 function outerMeshForName(name: string | null, indexes: ReturnType<typeof buildIndexes>) {
-  if (!name || !worldTopo) return null;
+  if (!name || !live?.topo) return null;
   const mode = live?.mode || "countries";
   const regionBy = live?.regionByCountryName || {};
-  return mesh(worldTopo, worldTopo.objects.countries as any, (a: any, b: any) => {
+  return mesh(live.topo, live.topo.objects.countries || live.topo.objects.states as any, (a: any, b: any) => {
     const na = resolveDataName(a.properties || {}, indexes, a.id);
     const nb = resolveDataName(b.properties || {}, indexes, b.id);
     const aIn = nameMatches(na, name, mode, regionBy);
@@ -291,9 +314,9 @@ export const DEFAULT_FOCUS: [number, number] = [20, 50];
 export const SERBIA_FOCUS: [number, number] = [20.9, 44.1];
 
 export function countryCentroidLonLat(name: string | null): [number, number] | null {
-  if (!name || !live || !countriesGeo) return null;
-  const feats = (countriesGeo.features as any[]).filter(
-    (f) => resolveDataName(f.properties || {}, live!.indexes, f.id) === name
+  if (!name || !live) return null;
+  const feats = (live.features || []).filter(
+    (f: any) => resolveDataName(f.properties || {}, live!.indexes, f.id) === name
   );
   if (!feats.length) return null;
   const c =
@@ -362,8 +385,27 @@ export function lookAtLonLat(
   height: number,
   zoom: number
 ): { pan: [number, number]; rotation: [number, number, number]; zoom: number } {
-  const sphere = { type: "Sphere" } as any;
   const zoomK = Math.max(1, Math.min(8, zoom || 1));
+  if (live?.atlas === "usa" && usaGeo) {
+    const projection = d3.geoAlbersUsa().fitExtent(
+      [
+        [12, 12],
+        [width - 12, height - 12],
+      ],
+      usaGeo
+    );
+    projection.scale(projection.scale() * zoomK);
+    const xy = projection([lon, lat]);
+    if (!xy || !Number.isFinite(xy[0])) {
+      return { pan: [0, 0], rotation: [0, 0, 0], zoom: 1 };
+    }
+    return {
+      pan: [width / 2 - xy[0], height / 2 - xy[1]],
+      rotation: [0, 0, 0],
+      zoom: zoomK,
+    };
+  }
+  const sphere = { type: "Sphere" } as any;
   if (surface === "globe") {
     return { pan: [0, 0], rotation: [-lon, -lat, 0], zoom: zoomK };
   }
@@ -490,13 +532,15 @@ export function liveMapCanRecolor(
   surface: string,
   zoom: number,
   mode: string,
-  pinKey: string
+  pinKey: string,
+  atlas: string = "world"
 ) {
   if (!live) return false;
   return (
     live.W === width &&
     live.H === height &&
     live.surface === surface &&
+    live.atlas === atlas &&
     live.zoom === Math.max(1, Math.min(8, zoom || 1)) &&
     live.mode === mode &&
     live.pinKey === pinKey
@@ -523,6 +567,7 @@ export function recolorLiveMap(options: MapRenderOpts) {
     d3.select(svg).select("rect").attr("fill", bg);
   }
   live.scene.selectAll("path.ocean-feat").attr("fill", oceanFill(options.state, bg));
+  if (live.atlas === "usa") d3.select(svg).select("rect").attr("fill", oceanFill(options.state, bg));
   live.scene.selectAll("path.country-feat").attr("fill", (d: any) => live!.fillFeature(d));
   paintHtmlLegend({
     metricId: coloring.metricId,
@@ -559,44 +604,59 @@ export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpt
   cancelMapFly();
   const { state, snapshot, mode, width: W, height: H } = options;
   await loadMapLibs();
+  const atlas: "world" | "usa" = options.atlas === "usa" ? "usa" : "world";
+  drawingAtlas = atlas;
   const bg = state.appearance.bgColor;
   svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svgEl.style.background = bg;
   svgEl.innerHTML = "";
 
-  const surface = state.map.surface || "map";
+  const surface = atlas === "usa" ? "map" : state.map.surface || "map";
   const zoomK = Math.max(1, Math.min(8, state.map.zoom || 1));
   const rot = (state.map.rotation || [0, 0, 0]) as [number, number, number];
   const sphere = { type: "Sphere" } as any;
+  const usaFc = usaGeo;
   const projection =
-    surface === "globe"
-      ? d3.geoOrthographic().fitSize([W - 24, H - 24], sphere).rotate(rot).clipAngle(90)
-      : d3.geoNaturalEarth1().fitSize([W - 8, H - 8], sphere);
+    atlas === "usa"
+      ? d3.geoAlbersUsa().fitExtent(
+          [
+            [16, 16],
+            [W - 16, H - 16],
+          ],
+          usaFc
+        )
+      : surface === "globe"
+        ? d3.geoOrthographic().fitSize([W - 24, H - 24], sphere).rotate(rot).clipAngle(90)
+        : d3.geoNaturalEarth1().fitSize([W - 8, H - 8], sphere);
   projection.scale(projection.scale() * zoomK);
   let pan = ([...(state.map.pan || [0, 0])] as [number, number]);
   const path = d3.geoPath(projection);
   const g = d3.select(svgEl);
   svgEl.style.cursor = "grab";
-  g.append("rect").attr("width", W).attr("height", H).attr("fill", bg);
+  const ocean = oceanFill(state, bg);
+  g.append("rect").attr("width", W).attr("height", H).attr("fill", atlas === "usa" ? ocean : bg);
   const scene = g
     .append("g")
     .attr("class", "map-scene")
     .attr("transform", surface === "globe" ? null : `translate(${pan[0]},${pan[1]})`);
-  scene
-    .append("path")
-    .datum(sphere)
-    .attr("class", "scene-path ocean-feat")
-    .attr("d", path as any)
-    .attr("fill", oceanFill(state, bg))
-    .attr("stroke", "#334155")
-    .attr("stroke-width", 0.6);
+  if (atlas !== "usa") {
+    scene
+      .append("path")
+      .datum(sphere)
+      .attr("class", "scene-path ocean-feat")
+      .attr("d", path as any)
+      .attr("fill", ocean)
+      .attr("stroke", "#334155")
+      .attr("stroke-width", 0.6);
+  }
 
   const indexes = buildIndexes(snapshot.countries);
   const selectedSet = new Set(state.map.pins);
   const coloring = buildMapColoring(options);
   const { fillFor, colorOpts, seqMin, seqMax, metricId, dataByName, regionByCountryName } = coloring;
 
-  const features = countriesGeo.features as any[];
+  const topo = atlas === "usa" ? usaTopo : worldTopo;
+  const features = ((atlas === "usa" ? usaGeo : countriesGeo).features as any[]) || [];
   scene
     .append("g")
     .attr("class", "countries")
@@ -656,10 +716,11 @@ export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpt
       if (mode !== "regions" && name) options.onDblClick(name, event);
     });
 
-  if (worldTopo) {
-    const border = mesh(worldTopo, worldTopo.objects.countries as any, (a: any, b: any) => {
+  if (topo) {
+    const obj = atlas === "usa" ? topo.objects.states : topo.objects.countries;
+    const border = mesh(topo, obj as any, (a: any, b: any) => {
       if (a === b) return true;
-      if (isSerbiaKosovoPair(a, b, indexes)) return false;
+      if (atlas !== "usa" && isSerbiaKosovoPair(a, b, indexes)) return false;
       return true;
     });
     scene
@@ -811,6 +872,8 @@ export async function renderWorldMap(svgEl: SVGSVGElement, options: MapRenderOpt
       return fillFor(name ? snapshot.countries[name] : null);
     },
     pinKey: [...selectedSet].sort().join(","),
+    atlas,
+    topo,
   };
 
   refreshHub();
@@ -1156,6 +1219,8 @@ function tagLines(rec: any, fields: TagField[], mode: string) {
   if (fields.includes("name")) lines.push(name);
   if (fields.includes("population")) lines.push(`${formatPop(rec.population)} ${t("metrics.population.unit")}`);
   if (fields.includes("tfr")) lines.push(`${t("hover.tfr")} ${Number(rec.tfr).toFixed(2)}`);
+  if (fields.includes("tmr") && rec.tmr != null) lines.push(`${t("hover.tmr")} ${Number(rec.tmr).toFixed(3)}`);
+  if (fields.includes("cpm") && rec.cpm != null) lines.push(`${t("hover.cpm")} ${Number(rec.cpm).toFixed(2)}`);
   if (fields.includes("vsReplacement")) {
     const d = rec.tfr / REPLACEMENT_TFR - 1;
     lines.push(`${d >= 0 ? "+" : ""}${(d * 100).toFixed(0)}% ${t("tags.vsReplacement")}`);
@@ -1208,6 +1273,8 @@ export function hoverHtml(rec: any, meta: any = {}) {
     <div class="map-hover-row"><span>${t("hover.year")}</span><strong>${rec.year ?? "—"}</strong></div>
     <div class="map-hover-row"><span>${t("hover.population")}</span><strong>${formatPop(rec.population)}</strong></div>
     <div class="map-hover-row"><span>${t("hover.tfr")}</span><strong>${Number(rec.tfr).toFixed(2)}</strong></div>
+    ${rec.tmr != null ? `<div class="map-hover-row"><span>${t("hover.tmr")}</span><strong>${Number(rec.tmr).toFixed(3)}</strong></div>` : ""}
+    ${rec.cpm != null ? `<div class="map-hover-row"><span>${t("hover.cpm")}</span><strong>${Number(rec.cpm).toFixed(2)}</strong></div>` : ""}
     ${gap}
     <div class="map-hover-row"><span>${t("hover.median")}</span><strong>${Number(rec.medianAge).toFixed(1)}</strong></div>
     <div class="map-hover-row"><span>${t("hover.elderly")}</span><strong>${Number(rec.elderlyPct).toFixed(1)}%</strong></div>

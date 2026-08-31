@@ -94,6 +94,9 @@ export function mergeKosovoIntoSerbia(
   };
 }
 
-export function displayName(rec: { name: string; includesKosovo?: boolean }) {
-  return countryName(rec.name);
+export function displayName(rec: { name: string; includesKosovo?: boolean; iso2?: string }) {
+  const raw = rec.name || "";
+  const n = raw.startsWith("US::") ? raw.slice(4) : raw;
+  if (raw.startsWith("US::") || (rec.iso2 && /^us-/i.test(rec.iso2))) return n;
+  return countryName(n);
 }

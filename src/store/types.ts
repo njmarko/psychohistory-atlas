@@ -1,4 +1,4 @@
-export type ViewMode = "pyramid" | "triangle" | "map" | "regions" | "database" | "help";
+export type ViewMode = "pyramid" | "triangle" | "map" | "usa" | "regions" | "database" | "help";
 
 export type RegionName = "Europe" | "Asia" | "Africa" | "Americas" | "Oceania" | "Other";
 
@@ -47,6 +47,10 @@ export type CountryRecord = {
     idealTfrSource: SourceRef | null;
     idealTfrMeanAll: number | null;
     fertilityGap: number | null;
+    tmr?: number;
+    tmrYear?: number;
+    cpm?: number;
+    cpmYear?: number;
   };
   series: {
     tfr: SeriesPoint[];
@@ -105,6 +109,8 @@ export type TagField =
   | "name"
   | "population"
   | "tfr"
+  | "tmr"
+  | "cpm"
   | "vsReplacement"
   | "fertilityGap"
   | "medianAge"
@@ -175,7 +181,7 @@ export type AppState = {
   };
   map: {
     metric: string;
-    metricByView: Record<"map" | "regions" | "triangle", string>;
+    metricByView: Record<"map" | "regions" | "triangle" | "usa", string>;
     countryFill: string;
     oceanColor: string;
     countrySet: "all" | "tfr2026";
@@ -299,7 +305,7 @@ export const DEFAULT_STATE: AppState = {
   },
   map: {
     metric: "tfr",
-    metricByView: { map: "tfr", regions: "tfr", triangle: "" },
+    metricByView: { map: "tfr", regions: "tfr", triangle: "", usa: "tfr" },
     countryFill: "#5A7A94",
     oceanColor: "#111A2F",
     countrySet: "all",

@@ -1,4 +1,5 @@
 import { loadDataset, freshYear, earliestPyramidYear } from "./data/load";
+import { loadUsaStates, isUsaStateKey, usaStateKey, usaStateLabel } from "./data/usa-states";
 import { METRICS } from "./data/metrics";
 import { displayName } from "./data/serbia-kosovo";
 import {
@@ -80,6 +81,7 @@ let mobileLeft = false;
 let mobileRight = false;
 
 let countries: Record<string, CountryRecord> = {};
+let usaStates: Record<string, CountryRecord> = {};
 let bundled: Record<string, CountryRecord> = {};
 let frames: PyramidFrame[] = [];
 let scaleMax = 1;
@@ -114,6 +116,7 @@ export async function boot() {
   const loaded = await loadDataset();
   bundled = loaded.countries;
   countries = loaded.countries;
+  usaStates = await loadUsaStates(countries["United States"]);
   pyramidMinYear = earliestPyramidYear(countries);
   const startEl = $("startYear") as HTMLInputElement;
   startEl.min = String(pyramidMinYear);
@@ -133,9 +136,7 @@ export async function boot() {
   initTooltips();
   bindLangSwitch();
 
-  const names = Object.keys(countries).sort((a, b) =>
-    a === "Serbia" ? -1 : b === "Serbia" ? 1 : a.localeCompare(b)
-  );
+  const names = searchNames();
   const bindCombo = (inputId: string, listId: string) => {
     countrySearches.push(
       initCountrySearch({
@@ -155,7 +156,7 @@ export async function boot() {
   bindMapResize();
 
   const s = getState();
-  if (!s.country || !countries[s.country]) setState({ country: "Serbia" });
+  if (!s.country || !recOf(s.country)) setState({ country: "Serbia" });
   applyLayout(s);
   loadCountry(getState().country || "Serbia", { fly: false });
   setView(getState().view);
@@ -190,19 +191,33 @@ const SEARCH_ALIASES: Record<string, string> = {
 };
 
 function searchTokens(name: string) {
-  const c = countries[name];
-  const extra = SEARCH_ALIASES[name] || "";
-  const local = countryName(name);
+  const c = recOf(name);
+  const extra = SEARCH_ALIASES[usaStateLabel(name)] || SEARCH_ALIASES[name] || "";
+  const local = countryName(usaStateLabel(name));
   if (!c) return [extra, local, name].filter(Boolean).join(" ");
-  return [c.iso2, c.iso3, String(c.isoNum || ""), extra, local, name].filter(Boolean).join(" ");
+  return [c.iso2, c.iso3, String(c.isoNum || ""), extra, local, name, usaStateLabel(name)].filter(Boolean).join(" ");
 }
 
 function labelFor(name: string) {
-  const c = countries[name];
-  const flag = getFlagEmoji(name, c?.iso2);
-  const shown = c ? displayName(c) : countryName(name);
+  const c = recOf(name);
+  const flag = getFlagEmoji(usaStateLabel(name), c?.iso2);
+  const shown = c ? displayName(c) : countryName(usaStateLabel(name));
   const tfr = c ? ` (${t("hover.tfr")} ${c.latest.tfr.toFixed(2)} · ${c.latest.tfrYear})` : "";
   return `${flag} ${shown}${tfr}`;
+}
+
+function searchNames() {
+  if (getState().view === "usa") {
+    return Object.keys(usaStates).sort((a, b) => usaStateLabel(a).localeCompare(usaStateLabel(b)));
+  }
+  return Object.keys(countries).sort((a, b) =>
+    a === "Serbia" ? -1 : b === "Serbia" ? 1 : a.localeCompare(b)
+  );
+}
+
+function syncSearchCatalog() {
+  const names = searchNames();
+  countrySearches.forEach((api) => api.refreshNames(names));
 }
 
 function fillMetricSelects() {
@@ -223,6 +238,8 @@ function fillTagFields() {
     { id: "name", label: t("tags.name") },
     { id: "population", label: t("tags.population") },
     { id: "tfr", label: t("tags.tfr") },
+    { id: "tmr", label: t("tags.tmr") },
+    { id: "cpm", label: t("tags.cpm") },
     { id: "vsReplacement", label: t("tags.vsReplacement") },
     { id: "fertilityGap", label: t("tags.fertilityGap") },
     { id: "medianAge", label: t("tags.medianAge") },
@@ -248,14 +265,27 @@ function fillTagFields() {
 }
 
 function layoutBucket(view: ViewMode): "pyramid" | "mapish" | "other" {
-  if (view === "map" || view === "regions" || view === "triangle") return "mapish";
+  if (view === "map" || view === "regions" || view === "triangle" || view === "usa") return "mapish";
   if (view === "pyramid") return "pyramid";
   return "other";
 }
 
+function isMapish(view: ViewMode) {
+  return view === "map" || view === "regions" || view === "triangle" || view === "usa";
+}
+
+function catalog() {
+  if (getState().view === "usa") return usaStates;
+  return countries;
+}
+
+function recOf(name: string) {
+  return countries[name] || usaStates[name];
+}
+
 function defaultPanelsFor(view: ViewMode) {
   if (view === "pyramid") return { leftOpen: true, rightOpen: true };
-  if (view === "map" || view === "regions" || view === "triangle") return { leftOpen: false, rightOpen: false };
+  if (isMapish(view)) return { leftOpen: false, rightOpen: false };
   return { leftOpen: true, rightOpen: false };
 }
 
@@ -282,8 +312,8 @@ function applyViewPanels(view: ViewMode) {
   applyLayout(getState());
 }
 
-function mapishMetricKey(view: ViewMode): "map" | "regions" | "triangle" | null {
-  if (view === "map" || view === "regions" || view === "triangle") return view;
+function mapishMetricKey(view: ViewMode): "map" | "regions" | "triangle" | "usa" | null {
+  if (view === "map" || view === "regions" || view === "triangle" || view === "usa") return view;
   return null;
 }
 
@@ -309,7 +339,7 @@ function applyPageBackground(color: string) {
 
 function syncHeatmapChrome() {
   const s = getState();
-  const mapish = s.view === "map" || s.view === "regions" || s.view === "triangle";
+  const mapish = isMapish(s.view);
   const on = Boolean(s.map.metric);
   const heat = $("heatmapControls");
   if (heat) heat.hidden = !on;
@@ -359,7 +389,7 @@ function applyToolbarMetric(id: string) {
   syncToolbarMetric();
   syncHeatmapChrome();
   const view = getState().view;
-  if (view === "map" || view === "regions" || view === "triangle") render();
+  if (isMapish(view)) render();
 }
 
 function bindMetricCombo() {
@@ -480,6 +510,7 @@ function viewLabel(view: ViewMode) {
     pyramid: "nav.pyramid",
     triangle: "nav.triangle",
     map: "nav.map",
+    usa: "nav.usa",
     regions: "nav.regions",
     database: "nav.database",
     help: "nav.help",
@@ -608,8 +639,43 @@ function syncPanelButtons(mobile: boolean, leftOn: boolean, rightOn: boolean) {
   if (country) country.setAttribute("data-tip", rightTip);
 }
 
+function syncViewCopy() {
+  const usa = getState().view === "usa";
+  document.querySelectorAll('[data-i18n="country.label"]').forEach((el) => {
+    el.textContent = usa ? t("country.labelUsa") : t("country.label");
+  });
+  const search = $("countrySearch") as HTMLInputElement | null;
+  if (search) search.placeholder = usa ? t("country.searchUsa") : t("country.search");
+  const header = $("headerCountrySearch") as HTMLInputElement | null;
+  if (header) {
+    header.placeholder = usa ? t("country.searchUsa") : t("country.headerSearch");
+    header.setAttribute("aria-label", usa ? t("country.labelUsa") : t("country.label"));
+  }
+  const countryTip = document.querySelector("#panelCountry [data-i18n-tip='country.tip']") as HTMLElement | null;
+  if (countryTip) countryTip.setAttribute("data-tip", usa ? t("country.tipUsa") : t("country.tip"));
+  const surfField = $("mapSurface")?.closest(".field") as HTMLElement | null;
+  if (surfField) surfField.hidden = usa;
+  const setField = $("mapCountrySet")?.closest(".field") as HTMLElement | null;
+  if (setField) setField.hidden = usa;
+}
+
 function setView(mode: ViewMode) {
+  const prev = getState().view;
   const view: ViewMode = mode || "pyramid";
+  let nextCountry: string | null = null;
+  if (view === "usa") {
+    const patch: Partial<AppState["map"]> = { surface: "map" };
+    if (prev !== "usa") {
+      patch.zoom = 1;
+      patch.pan = [0, 0] as [number, number];
+      patch.rotation = [0, 0, 0] as [number, number, number];
+      patch.pins = [];
+    }
+    updateMap(patch);
+    if (!isUsaStateKey(getState().country)) nextCountry = usaStateKey("California");
+  } else if (isUsaStateKey(getState().country) && view !== "pyramid") {
+    nextCountry = "United States";
+  }
   setState({ view });
   document.body.className = `mode-${view}`;
   $("modeTabs").querySelectorAll(".mode-tab").forEach((btn) => {
@@ -617,7 +683,7 @@ function setView(mode: ViewMode) {
   });
   closeNavSheet();
   syncNavSheet();
-  const mapish = view === "map" || view === "regions" || view === "triangle";
+  const mapish = isMapish(view);
   $("viewPyramid").hidden = view !== "pyramid";
   $("viewTriangle").hidden = true;
   $("viewMap").hidden = !mapish;
@@ -626,14 +692,24 @@ function setView(mode: ViewMode) {
   if (help) help.hidden = view !== "help";
   $("panelMapOptions").hidden = !mapish;
   ($("triangleCanvas") as HTMLCanvasElement).hidden = view !== "triangle";
-  $("yearStrip").hidden = !(view === "triangle" || view === "map" || view === "regions");
+  $("yearStrip").hidden = !mapish;
   $("mapHeader").hidden = view === "triangle";
   const cross = document.getElementById("mapCrosshair");
-  if (cross) cross.hidden = !(view === "triangle" || view === "map" || view === "regions");
+  if (cross) cross.hidden = !(view === "triangle" || view === "map" || view === "regions" || view === "usa");
+  const surfaceDock = document.querySelector(".map-surface-dock") as HTMLElement | null;
+  if (surfaceDock) surfaceDock.hidden = view === "usa";
   syncHubCardChrome();
   if (view === "triangle") fillHubCard(getState().country);
   $("mapTitle").textContent =
-    view === "regions" ? t("map.titleRegions") : view === "triangle" ? t("map.titleTriangle") : t("map.titleMap");
+    view === "usa"
+      ? t("map.titleUsa")
+      : view === "regions"
+        ? t("map.titleRegions")
+        : view === "triangle"
+          ? t("map.titleTriangle")
+          : t("map.titleMap");
+  syncViewCopy();
+  syncSearchCatalog();
   if (view === "database") renderDatabase();
   stopPlayback();
   const toolbar = $("viewToolbar");
@@ -651,7 +727,8 @@ function setView(mode: ViewMode) {
     mobileRight = false;
   }
   applyViewPanels(view);
-  recompute();
+  if (nextCountry) loadCountry(nextCountry, { fly: false });
+  else recompute();
   syncToolbarMetric();
   if (viewPlaysSimulation(view)) startPlayback();
 }
@@ -1200,6 +1277,7 @@ function isPristineMapView(m: AppState["map"]) {
 }
 
 function focusSerbiaIfPristine(W: number, H: number) {
+  if (getState().view === "usa") return;
   const m = getState().map;
   if (!isPristineMapView(m)) return;
   const zoom = m.zoom <= 1.05 ? 2.6 : m.zoom;
@@ -1240,7 +1318,7 @@ function syncYearChrome(year: number) {
   if (statYear) statYear.textContent = String(year);
   const strip = $("yearStrip");
   const view = getState().view;
-  const show = view === "triangle" || view === "map" || view === "regions";
+  const show = isMapish(view);
   strip.hidden = !show;
   if (show) {
     renderYearStrip(strip, yearsInRange(), year, (y) => {
@@ -1334,7 +1412,7 @@ function syncCountryCombos(name: string) {
 }
 
 function syncCountryDataLabel(name = getState().country) {
-  const c = countries[name];
+  const c = recOf(name);
   const sub = $("rightSubtitle");
   if (sub) sub.textContent = c ? displayName(c) : t("charts.empty");
 }
@@ -1344,7 +1422,7 @@ let pendingFlyName: string | null = null;
 function focusCountryOnMap(name: string) {
   if (!mapFlyEnabled) return;
   const view = getState().view;
-  if (view !== "map" && view !== "regions" && view !== "triangle") return;
+  if (!isMapish(view)) return;
   pendingFlyName = name;
   tryFlyToPending();
 }
@@ -1358,18 +1436,18 @@ function tryFlyToPending() {
 }
 
 function viewPlaysSimulation(view: ViewMode) {
-  return view === "pyramid" || view === "triangle" || view === "map" || view === "regions";
+  return view === "pyramid" || isMapish(view);
 }
 
 function adoptCountry(name: string) {
-  if (!name || !countries[name]) return;
+  if (!name || !recOf(name)) return;
   const view = getState().view;
   loadCountry(name);
   if (viewPlaysSimulation(view)) startPlayback();
 }
 
 function loadCountry(name: string, opts?: { keepYears?: boolean; fly?: boolean }) {
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) return;
   setState({ country: name });
   syncCountryCombos(name);
@@ -1433,6 +1511,8 @@ function renderSourceCard(c: CountryRecord) {
     displayName(c),
     t("source.ageSex", { year: c.base.year, src: sourceLabel(c.base.source.id, c.base.source.label) }),
     t("source.tfr", { n: c.latest.tfr.toFixed(2), year: c.latest.tfrYear, src: sourceLabel(c.latest.tfrSource.id, c.latest.tfrSource.label) }),
+    c.latest.tmr != null ? t("source.tmr", { n: c.latest.tmr.toFixed(3), year: c.latest.tmrYear ?? c.latest.tfrYear }) : "",
+    c.latest.cpm != null ? t("source.cpm", { n: c.latest.cpm.toFixed(2), year: c.latest.cpmYear ?? c.latest.tfrYear }) : "",
     c.latest.idealTfr != null
       ? t("source.ideals", {
           n: c.latest.idealTfr.toFixed(2),
@@ -1444,7 +1524,7 @@ function renderSourceCard(c: CountryRecord) {
     t("source.mig", { n: formatPop(c.latest.netMigration), year: c.latest.netMigrationYear }),
     gap,
     t("source.simStart", { year: freshYear(c), base: c.base.year }),
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 function simParams() {
@@ -1495,6 +1575,7 @@ function yearRange() {
 }
 
 function mapNames() {
+  if (getState().view === "usa") return Object.keys(usaStates);
   const set = ($("mapCountrySet") as HTMLSelectElement).value;
   return Object.keys(countries).filter((n) => {
     if (!countries[n]?.base?.male) return false;
@@ -1513,10 +1594,10 @@ function recompute() {
     if (view === "database") renderDatabase();
     return;
   }
-  if (view === "map" || view === "regions" || view === "triangle") {
+  if (isMapish(view)) {
     const t0 = performance.now();
     worldByCountry = projectAllCountries(
-      countries,
+      catalog(),
       mapNames(),
       { ...simParams(), idealMode: getState().map.idealMode },
       startYear,
@@ -1525,8 +1606,11 @@ function recompute() {
     frameIndex = Math.min(frameIndex, endYear - startYear);
     ($("yearScrub") as HTMLInputElement).min = String(startYear);
     ($("yearScrub") as HTMLInputElement).max = String(endYear);
-    $("mapStatus").textContent = t("map.ready", { n: mapNames().length, ms: (performance.now() - t0).toFixed(0) });
-    $("mapDataHint").textContent = t("map.hint", { n: mapNames().length });
+    $("mapStatus").textContent = t(view === "usa" ? "map.readyUsa" : "map.ready", {
+      n: mapNames().length,
+      ms: (performance.now() - t0).toFixed(0),
+    });
+    $("mapDataHint").textContent = t(view === "usa" ? "map.hintUsa" : "map.hint", { n: mapNames().length });
     rebuildPeakScales();
     if (view !== "triangle") {
       frames = [];
@@ -1534,7 +1618,7 @@ function recompute() {
       return;
     }
   }
-  const c = countries[getState().country];
+  const c = recOf(getState().country);
   if (!c) return;
   const params = paramsForCountry(c, simParams());
   frames = projectSeries(c.base, params, startYear, endYear);
@@ -1561,7 +1645,7 @@ function peakBarInSeries(series: PyramidFrame[], i0: number, i1: number) {
 
 /** Frames from `fromYear` through `fromYear + span`, extending the world series if needed. */
 function seriesAhead(name: string, fromYear: number, span: number): PyramidFrame[] {
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) return [];
   const spanYears = Math.max(1, Math.round(span));
   const wantEnd = fromYear + spanYears;
@@ -1658,7 +1742,7 @@ function simFrameFor(year: number): PyramidFrame | null {
 
 function pyramidOpts(frame: PyramidFrame) {
   const s = getState();
-  const c = countries[s.country];
+  const c = recOf(s.country);
   return {
     countryName: c ? displayName(c) : s.country,
     maleColor: s.appearance.maleColor,
@@ -1703,7 +1787,7 @@ function render() {
   frameIndex = year - simStartYear();
   updateTime({ currentYear: year });
   syncYearChrome(year);
-  if (view === "map" || view === "regions" || view === "triangle") {
+  if (isMapish(view)) {
     renderMap();
     if (view === "triangle") {
       if (playing || yearHold) {
@@ -1736,7 +1820,7 @@ function renderTriangleOverlay() {
   const rect = wrap.getBoundingClientRect();
   canvas.style.width = rect.width + "px";
   canvas.style.height = rect.height + "px";
-  const c = countries[getState().country];
+  const c = recOf(getState().country);
   const series = frames.length ? frames : worldByCountry?.[getState().country]?.series || [frame];
   const peaks = trianglePeakScales(series, 0, series.length - 1);
   scaleMax = peaks.pop;
@@ -1776,7 +1860,7 @@ async function renderMap() {
   const snapshot =
     year >= start
       ? snapshotYear(worldByCountry, year - start)
-      : snapshotFromSeries(countries, year);
+      : snapshotFromSeries(catalog(), year);
   const regionSnap = aggregateRegions(snapshot);
   const pop = snapshot.worldPop;
   const focused = snapshot.countries[getState().country];
@@ -1791,7 +1875,10 @@ async function renderMap() {
     $("statElderly").textContent = Number(focused.elderlyPct).toFixed(1) + "%";
     $("statTfr").textContent = Number(focused.tfr).toFixed(2);
   }
-  $("mapSubtitle").textContent = t("map.subtitle", { year, pop: formatPop(pop) });
+  $("mapSubtitle").textContent = t(getState().view === "usa" ? "map.subtitleUsa" : "map.subtitle", {
+    year,
+    pop: formatPop(pop),
+  });
 
   while (mapRenderPending) await new Promise((r) => setTimeout(r, 16));
   mapRenderPending = true;
@@ -1803,9 +1890,10 @@ async function renderMap() {
     const H = Math.max(120, Math.floor(rect.height));
     focusSerbiaIfPristine(W, H);
     const iso: Record<string, string | null> = {};
-    for (const n of getState().map.pins) iso[n] = countries[n]?.iso2 || null;
+    for (const n of getState().map.pins) iso[n] = recOf(n)?.iso2 || null;
     const mapOpts: MapRenderOpts = {
       mode: getState().view === "regions" ? "regions" : "countries",
+      atlas: getState().view === "usa" ? "usa" : "world",
       snapshot,
       regionSnapshot: regionSnap,
       state: getState(),
@@ -1893,10 +1981,11 @@ async function renderMap() {
         updateMap({ pinOffsets: { ...getState().map.pinOffsets, [name]: offset } });
       },
     };
-    const surface = getState().map.surface || "map";
+    const surface = getState().view === "usa" ? "map" : getState().map.surface || "map";
     const zoom = getState().map.zoom || 1;
     const pinKey = [...getState().map.pins].sort().join(",");
-    if (liveMapCanRecolor(W, H, surface, zoom, mapOpts.mode, pinKey) && recolorLiveMap(mapOpts)) {
+    const atlas = getState().view === "usa" ? "usa" : "world";
+    if (liveMapCanRecolor(W, H, surface, zoom, mapOpts.mode, pinKey, atlas) && recolorLiveMap(mapOpts)) {
       /* keep hover outlines */
     } else {
       await renderWorldMap($("worldMapSvg") as unknown as SVGSVGElement, mapOpts);
@@ -1924,7 +2013,7 @@ function hoverSeriesFor(name: string): PyramidFrame[] {
 
 function drawHoverMiniFrame() {
   const name = hoverActiveName;
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) return;
   const series = hoverSeriesFor(name);
   if (!series.length) return;
@@ -1964,7 +2053,7 @@ function drawHoverMiniFrame() {
 }
 
 function startHoverMini(name: string) {
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) return;
   const h = getState().hover;
   const canvas = $("hoverMiniCanvas") as HTMLCanvasElement;
@@ -1993,7 +2082,7 @@ function startHoverMini(name: string) {
 let chartTimer = 0;
 function adoptHubCountry(name: string) {
   if (!name) return;
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) return;
   fillHubCard(name);
   if (name === getState().country) return;
@@ -2055,13 +2144,13 @@ function fillHubCard(name: string | null) {
   if (getState().view !== "triangle" || !getState().map.hubCard || !name) return;
   const body = document.getElementById("hubCardBody");
   const title = document.getElementById("hubCardTitle");
-  const c = countries[name];
+  const c = recOf(name);
   const year = calendarYear();
   const start = simStartYear();
   const rec =
     year >= start && worldByCountry
       ? snapshotYear(worldByCountry, Math.max(0, year - start)).countries[name]
-      : snapshotFromSeries(countries, year).countries[name];
+      : snapshotFromSeries(catalog(), year).countries[name];
   if (title) title.textContent = c ? displayName(c) : name;
   if (body) {
     body.innerHTML = hoverHtml(rec || c, {
@@ -2100,7 +2189,7 @@ function startTriangleAnim() {
     return;
   }
   const name = getState().country;
-  const c = countries[name];
+  const c = recOf(name);
   if (!c) {
     renderTriangleOverlay();
     return;
@@ -2205,9 +2294,10 @@ function applyAppI18n() {
   syncHeatmapChrome();
   syncPlayButtons();
   syncNavSheet();
-  const c = countries[getState().country];
+  const c = recOf(getState().country);
   if (c) renderSourceCard(c);
   syncCountryDataLabel();
+  syncViewCopy();
   lastChartSig = "";
   if (getState().view === "database") renderDatabase();
   render();
@@ -2333,7 +2423,7 @@ function chartsPanelOpen() {
 
 function renderCharts() {
   if (!chartsPanelOpen()) return;
-  const c = countries[getState().country];
+  const c = recOf(getState().country);
   const host = $("chartStack");
   if (!c) {
     host.innerHTML = `<p class="hint">${t("charts.empty")}</p>`;
@@ -2458,7 +2548,7 @@ async function runExport() {
   canvas.height = height;
   const view: string = s.view;
   const count =
-    view === "map" || view === "regions" || view === "triangle"
+    isMapish(view as ViewMode)
       ? worldByCountry
         ? Object.values(worldByCountry)[0].series.length
         : frames.length
@@ -2483,7 +2573,7 @@ async function runExport() {
         ctx.fillStyle = s.appearance.bgColor;
         ctx.fillRect(0, 0, c.width, c.height);
         const boxes = exportLayoutBoxes(layout, width, height, view);
-        const mapish = view === "triangle" || view === "map" || view === "regions";
+        const mapish = isMapish(view as ViewMode);
         if (mapish) {
           await renderMap();
           const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, boxes.view.w, boxes.view.h);
@@ -2499,7 +2589,7 @@ async function runExport() {
                 popScale: peaks.pop,
                 deathScale: peaks.death,
                 birthScale: peaks.birth,
-                countryName: displayName(countries[s.country]),
+                countryName: displayName(recOf(s.country) || { name: s.country }),
                 overlay: true,
               });
               ctx.drawImage(tmp, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
@@ -2552,7 +2642,7 @@ type ExportBox = { x: number; y: number; w: number; h: number };
 function exportLayoutBoxes(layout: string, width: number, height: number, view: string) {
   const withGraphs = layout === "mapGraphs" || layout === "pyramidGraphs" || layout === "viewGraphsStats";
   const withStats = layout === "viewStats" || layout === "viewGraphsStats";
-  const mapish = view === "triangle" || view === "map" || view === "regions";
+  const mapish = view === "triangle" || view === "map" || view === "regions" || view === "usa";
   const graphW = withGraphs ? Math.round(width * 0.36) : 0;
   const colW = width - graphW;
   const stripH = withStats && mapish ? Math.max(40, Math.round(height * 0.05)) : 0;
@@ -2567,7 +2657,7 @@ function exportLayoutBoxes(layout: string, width: number, height: number, view: 
 }
 
 function paintGraphs(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
-  const c = countries[getState().country];
+  const c = recOf(getState().country);
   if (!c) return;
   const cfg = getState().charts;
   const year = getState().time.currentYear;

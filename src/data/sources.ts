@@ -8,6 +8,13 @@ export const SOURCES: Record<string, SourceRef> = {
     url: "https://population.un.org/wpp/",
     note: "CC BY 3.0 IGO. Age–sex structure, TFR, life expectancy, net migration.",
   },
+  birthgauge2025us: {
+    id: "birthgauge2025us",
+    label: "BirthGauge US states TFR / TMR / CPM 2025",
+    year: 2025,
+    url: "https://x.com/BirthGauge",
+    note: "TFR = TMR × CPM for US states and DC. TMR is first-birth TFR (share of women becoming mothers).",
+  },
   birthgauge2026: {
     id: "birthgauge2026",
     label: "BirthGauge / national statistical offices (2026 TFR file)",

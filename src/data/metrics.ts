@@ -13,6 +13,8 @@ export type MetricRecord = {
   netMigration?: number;
   idealTfr?: number | null;
   fertilityGap?: number | null;
+  tmr?: number | null;
+  cpm?: number | null;
   year?: number;
 };
 
@@ -34,6 +36,20 @@ export const METRICS: MetricDef[] = [
     unit: "children / woman",
     description: "Children per woman. BirthGauge when present, otherwise WPP or the slider",
     get: (r) => r.tfr,
+  },
+  {
+    id: "tmr",
+    label: "Total maternal rate",
+    unit: "share of women",
+    description: "TFR₁ — share of women who become mothers (first-birth TFR). BirthGauge 2025 for US states.",
+    get: (r) => (r.tmr != null && Number.isFinite(r.tmr) ? r.tmr : null),
+  },
+  {
+    id: "cpm",
+    label: "Children per mother",
+    unit: "children / mother",
+    description: "TFR / TMR. How many children mothers have at current period fertility. BirthGauge 2025 for US states.",
+    get: (r) => (r.cpm != null && Number.isFinite(r.cpm) ? r.cpm : null),
   },
   {
     id: "popShare",

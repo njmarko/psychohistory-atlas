@@ -230,6 +230,8 @@ function frameToSnap(name: string, rec: CountryRun, frame: PyramidFrame) {
     idealTfr: rec.idealTfr,
     fertilityGap,
     tfrVsReplacement: tfr - REPLACEMENT_TFR,
+    tmr: rec.rec.latest.tmr ?? null,
+    cpm: rec.rec.latest.cpm ?? null,
     worldShare: 0,
     frame,
   };

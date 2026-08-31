@@ -69,7 +69,7 @@ function persistUi(state: AppState) {
 }
 
 function isMapishView(view: AppState["view"]) {
-  return view === "map" || view === "regions" || view === "triangle";
+  return view === "map" || view === "regions" || view === "triangle" || view === "usa";
 }
 
 function hydrateLayout(saved: Partial<AppState["layout"]> | undefined, view: AppState["view"]): AppState["layout"] {

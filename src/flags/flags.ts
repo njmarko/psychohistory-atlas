@@ -1,8 +1,15 @@
 const imageCache = new Map<string, Promise<HTMLImageElement | null>>();
 
+/** Codes flagcdn does not host (DC). Paths are served from this app. */
+const LOCAL_FLAGS: Record<string, string> = {
+  "us-dc": "./flags/us-dc.svg",
+};
+
 export function iso2ToEmoji(iso2: string | null | undefined) {
-  if (!iso2 || iso2.length !== 2) return "🏳️";
+  if (!iso2) return "🏳️";
   const a = iso2.toUpperCase();
+  if (a.startsWith("US-") && a.length >= 4) return iso2ToEmoji("US");
+  if (a.length !== 2) return "🏳️";
   return String.fromCodePoint(...[...a].map((c) => 127397 + c.charCodeAt(0)));
 }
 
@@ -13,12 +20,16 @@ export function getFlagEmoji(countryName: string, iso2?: string | null) {
 
 export function getFlagCode(countryName: string, iso2Fallback: string | null = null) {
   if (countryName === "World") return null;
-  return iso2Fallback ? String(iso2Fallback).toLowerCase() : null;
+  const raw = iso2Fallback ? String(iso2Fallback).toLowerCase() : null;
+  if (!raw) return null;
+  if (/^[a-z]{2}(-[a-z0-9]{2})?$/.test(raw)) return raw;
+  return null;
 }
 
 export function flagImageUrl(countryName: string, iso2Fallback: string | null = null, width = 80) {
   const code = getFlagCode(countryName, iso2Fallback);
   if (!code) return null;
+  if (LOCAL_FLAGS[code]) return LOCAL_FLAGS[code];
   return `https://flagcdn.com/w${width}/${code}.png`;
 }
 
@@ -40,6 +51,10 @@ export function loadFlagImage(countryName: string, iso2Fallback: string | null =
   if (imageCache.has(key)) return imageCache.get(key)!;
 
   const promise = (async () => {
+    if (LOCAL_FLAGS[code]) {
+      const local = await loadImg(LOCAL_FLAGS[code]);
+      if (local && local.naturalWidth > 0) return local;
+    }
     const svg = await loadImg(`https://flagcdn.com/${code}.svg`);
     if (svg && svg.naturalWidth > 0) return svg;
     for (const w of [1280, 640, 320, 160]) {

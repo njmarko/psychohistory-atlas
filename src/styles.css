@@ -81,6 +81,24 @@ body {
   color: transparent;
 }
 .nav-credit { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.nav-x {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #7dd3fc;
+  text-decoration: none;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.nav-x:hover,
+.nav-x:focus-visible {
+  border-color: #38bdf8;
+  color: #e2e8f0;
+  outline: none;
+}
 .nav-tabs { display: flex; gap: 0.25rem; margin-left: 0.4rem; flex-wrap: wrap; }
 .nav-tabs .mode-tab {
   padding: 0.38rem 0.7rem;
@@ -381,6 +399,7 @@ body {
   z-index: 18;
   pointer-events: auto;
 }
+body.mode-usa .map-surface-dock { display: none !important; }
 .map-float-ui {
   position: absolute;
   right: 10px;
