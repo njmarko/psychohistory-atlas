@@ -311,7 +311,7 @@ export const en = {
   },
   export: {
     screens: "What is captured",
-    screensTip: "Records the view on screen: map behind the triangle, heatmap, and pinned tags.",
+    screensTip: "Records the view on screen: map behind the triangle, heatmap, pinned tags, and the hover window of the last country or state you pointed at.",
     layout: "Layout",
     layoutTip: "Current view matches the screen. Graphs fill the right side at full video height. Bottom statistics add the stats bar, and on map, triangle, and regions also the year strip.",
     single: "Current view",

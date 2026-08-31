@@ -110,6 +110,16 @@ let hoverActiveName = "";
 let hoverDrawnName = "";
 let hoverDrawnYear = NaN;
 let flagColorsFor: string | null = null;
+let exportRunning = false;
+type LastMapHover = {
+  name: string;
+  kind: "country" | "region";
+  left: number;
+  top: number;
+  width: number;
+  showMini: boolean;
+};
+let lastMapHover: LastMapHover | null = null;
 
 
 export async function boot() {
@@ -727,6 +737,8 @@ function setView(mode: ViewMode) {
     mobileRight = false;
   }
   applyViewPanels(view);
+  if (view !== "map" && view !== "usa" && view !== "regions") lastMapHover = null;
+  else if (prev !== view) lastMapHover = null;
   if (nextCountry) loadCountry(nextCountry, { fly: false });
   else recompute();
   syncToolbarMetric();
@@ -1933,8 +1945,21 @@ async function renderMap() {
         const y = Math.min(event.offsetY + 14, rect.height - sh - 12);
         stack.style.left = Math.max(8, x) + "px";
         stack.style.top = Math.max(8, y) + "px";
+        if (rec?.name) {
+          lastMapHover = {
+            name: rec.name,
+            kind: meta.kind === "region" ? "region" : "country",
+            left: Math.max(8, x),
+            top: Math.max(8, y),
+            width: showMini ? box : sw,
+            showMini,
+          };
+          stack.dataset.hoverName = rec.name;
+          stack.dataset.hoverKind = lastMapHover.kind;
+        }
       },
       onLeave: () => {
+        if (exportRunning) return;
         if (getState().view === "triangle") return;
         if (isCoarsePointer() || isMobile()) return;
         $("mapHoverStack").hidden = true;
@@ -2554,7 +2579,21 @@ async function runExport() {
         : frames.length
       : frames.length;
   const layout = s.exportOpts.layout;
+  const captureHover =
+    (view === "map" || view === "usa" || view === "regions") && lastMapHover ? { ...lastMapHover } : null;
+  exportRunning = true;
   try {
+    if (captureHover?.showMini && captureHover.name) {
+      const rec = recOf(captureHover.name);
+      hoverActiveName = captureHover.name;
+      if (rec) {
+        const img = await loadFlagImage(captureHover.name, rec.iso2);
+        if (img) {
+          hoverFlag = img;
+          hoverFlagFor = captureHover.name;
+        }
+      }
+    }
     const { blob, ext } = await exportPaintedVideo({
       canvas,
       frameCount: count,
@@ -2576,6 +2615,7 @@ async function runExport() {
         const mapish = isMapish(view as ViewMode);
         if (mapish) {
           await renderMap();
+          if (captureHover) applyHoverForExport(captureHover);
           const img = await svgToImage($("worldMapSvg") as unknown as SVGSVGElement, boxes.view.w, boxes.view.h);
           ctx.drawImage(img, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
           if (view === "triangle") {
@@ -2594,6 +2634,8 @@ async function runExport() {
               });
               ctx.drawImage(tmp, boxes.view.x, boxes.view.y, boxes.view.w, boxes.view.h);
             }
+          } else if (captureHover) {
+            paintHoverStack(ctx, boxes.view, captureHover);
           }
         } else {
           const frame = frames[i] || simFrameFor(year);
@@ -2620,8 +2662,168 @@ async function runExport() {
   } catch (err: any) {
     status.className = "export-status";
     status.textContent = t("export.failed", { err: err.message || err });
+  } finally {
+    exportRunning = false;
+    if (captureHover) {
+      $("mapHoverStack").hidden = true;
+      stopHoverMini();
+    }
   }
   render();
+}
+
+function hoverRecAtCurrentYear(hover: LastMapHover) {
+  const year = calendarYear();
+  const start = simStartYear();
+  const snapshot =
+    year >= start && worldByCountry
+      ? snapshotYear(worldByCountry, Math.max(0, year - start))
+      : snapshotFromSeries(catalog(), year);
+  if (hover.kind === "region") {
+    return aggregateRegions(snapshot).regions[hover.name] || null;
+  }
+  return snapshot.countries[hover.name] || recOf(hover.name) || null;
+}
+
+function applyHoverForExport(hover: LastMapHover) {
+  const rec = hoverRecAtCurrentYear(hover);
+  const stack = $("mapHoverStack");
+  const card = $("mapHoverCard");
+  if (!stack || !card) return;
+  const metricId = getState().map.metric;
+  stack.hidden = false;
+  card.innerHTML = hoverHtml(rec, { kind: hover.kind, metricId });
+  const showMini = !!(hover.showMini && hover.kind === "country" && hover.name);
+  stack.classList.toggle("has-pyramid", showMini);
+  stack.style.width = (hover.width || 280) + "px";
+  stack.style.left = hover.left + "px";
+  stack.style.top = hover.top + "px";
+  const hv = getState().hover;
+  stack.style.opacity = String(Math.max(0.2, Math.min(1, (hv.opacity ?? 92) / 100)));
+  stack.dataset.hoverName = hover.name;
+  stack.dataset.hoverKind = hover.kind;
+  const strip = $("mapHoverMetric");
+  const metric = rec ? formatHeatmapMetric(rec, metricId) : null;
+  if (strip) {
+    strip.hidden = !showMini || !metric;
+    strip.innerHTML = metric ? `<span>${metric.label}</span><strong>${metric.text}</strong>` : "";
+  }
+  if (showMini) {
+    startHoverMini(hover.name);
+    drawHoverMiniFrame();
+  } else {
+    ($("hoverMiniCanvas") as HTMLCanvasElement).style.display = "none";
+    hoverActiveName = "";
+  }
+}
+
+function pathRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function paintHoverCardDom(
+  ctx: CanvasRenderingContext2D,
+  card: HTMLElement,
+  x: number,
+  y: number,
+  w: number,
+  _h: number,
+  sx: number,
+  sy: number
+) {
+  const padX = 13 * sx;
+  const padY = 11 * sy;
+  let cy = y + padY;
+  const title = card.querySelector(".map-hover-title")?.textContent || "";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#f1f5f9";
+  ctx.font = `700 ${Math.max(11, Math.round(14.7 * sy))}px "DM Sans", system-ui, sans-serif`;
+  ctx.textAlign = "left";
+  ctx.fillText(title, x + padX, cy, Math.max(8, w - padX * 2));
+  cy += 22 * sy;
+  card.querySelectorAll(".map-hover-row").forEach((row) => {
+    const label = row.querySelector("span")?.textContent || "";
+    const value = row.querySelector("strong")?.textContent || "";
+    const isMetric = row.classList.contains("heatmap-metric");
+    ctx.font = `400 ${Math.max(10, Math.round(12.8 * sy))}px "DM Sans", system-ui, sans-serif`;
+    ctx.fillStyle = isMetric ? "#7dd3fc" : "#94a3b8";
+    ctx.textAlign = "left";
+    ctx.fillText(label, x + padX, cy, w * 0.58);
+    ctx.font = `500 ${Math.max(10, Math.round(12.5 * sy))}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = isMetric ? "#fbbf24" : "#e2e8f0";
+    ctx.textAlign = "right";
+    ctx.fillText(value, x + w - padX, cy);
+    cy += 18 * sy;
+  });
+}
+
+function paintHoverStack(ctx: CanvasRenderingContext2D, viewBox: ExportBox, hover: LastMapHover) {
+  const wrap = $("mapWrap");
+  if (!wrap) return;
+  const wrapW = Math.max(1, wrap.clientWidth);
+  const wrapH = Math.max(1, wrap.clientHeight);
+  const sx = viewBox.w / wrapW;
+  const sy = viewBox.h / wrapH;
+  const showMini = !!(hover.showMini && hover.kind === "country");
+  const srcW = Math.max(160, hover.width || 280);
+  const srcH = showMini ? srcW * (2 / 3) + 36 : 188;
+  let w = srcW * sx;
+  let h = srcH * sy;
+  let x = viewBox.x + hover.left * sx;
+  let y = viewBox.y + hover.top * sy;
+  x = Math.max(viewBox.x + 8, Math.min(x, viewBox.x + viewBox.w - w - 8));
+  y = Math.max(viewBox.y + 8, Math.min(y, viewBox.y + viewBox.h - h - 8));
+  const r = Math.max(6, 8 * Math.min(sx, sy));
+  ctx.save();
+  ctx.globalAlpha = Math.max(0.2, Math.min(1, (getState().hover.opacity ?? 92) / 100));
+  pathRoundRect(ctx, x, y, w, h, r);
+  ctx.fillStyle = "rgba(15, 23, 42, 0.96)";
+  ctx.fill();
+  ctx.lineWidth = Math.max(2, 1.5 * sx);
+  ctx.strokeStyle = "#475569";
+  ctx.stroke();
+  pathRoundRect(ctx, x, y, w, h, r);
+  ctx.clip();
+  const strip = $("mapHoverMetric");
+  const stripVisible = !!(showMini && strip && !strip.hidden);
+  let contentTop = y;
+  if (stripVisible && strip) {
+    const sh = 32 * sy;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.96)";
+    ctx.fillRect(x, y, w, sh);
+    ctx.fillStyle = "#334155";
+    ctx.fillRect(x, y + sh - Math.max(1, sy), w, Math.max(1, sy));
+    const label = strip.querySelector("span")?.textContent || "";
+    const value = strip.querySelector("strong")?.textContent || "";
+    ctx.textBaseline = "middle";
+    ctx.font = `400 ${Math.max(10, Math.round(12.5 * sy))}px "DM Sans", system-ui, sans-serif`;
+    ctx.fillStyle = "#7dd3fc";
+    ctx.textAlign = "left";
+    ctx.fillText(label, x + 10 * sx, y + sh / 2, w * 0.62);
+    ctx.font = `600 ${Math.max(10, Math.round(12.5 * sy))}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = "#fbbf24";
+    ctx.textAlign = "right";
+    ctx.fillText(value, x + w - 10 * sx, y + sh / 2);
+    contentTop = y + sh;
+  }
+  const mini = $("hoverMiniCanvas") as HTMLCanvasElement;
+  if (showMini && mini && mini.width > 0) {
+    try {
+      ctx.drawImage(mini, x, contentTop, w, y + h - contentTop);
+    } catch {
+      paintHoverCardDom(ctx, $("mapHoverCard"), x, contentTop, w, h - (contentTop - y), sx, sy);
+    }
+  } else {
+    paintHoverCardDom(ctx, $("mapHoverCard"), x, contentTop, w, h - (contentTop - y), sx, sy);
+  }
+  ctx.restore();
 }
 
 function scratch(w: number, h: number) {
